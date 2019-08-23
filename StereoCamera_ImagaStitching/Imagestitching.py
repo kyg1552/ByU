@@ -1,3 +1,6 @@
+#-*- coding: utf-8 -*-
+#! /usr/bin/env python2
+
 import cv2
 import numpy as np
 import sys
@@ -21,7 +24,7 @@ class Image_Stitching():
                 good_points.append((m1.trainIdx, m1.queryIdx))
                 good_matches.append([m1])
         img3 = cv2.drawMatchesKnn(img1, kp1, img2, kp2, good_matches, None, flags=2)
-        cv2.imwrite('./costomer_image/matching_image/matching4.jpg', img3)
+        #cv2.imwrite('./costomer_image/matching_image/matching4.jpg', img3)
         if len(good_points) > self.min_match:
             image1_kp = np.float32(
                 [kp1[i].pt for (_, i) in good_points])
