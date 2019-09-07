@@ -124,10 +124,10 @@ def byu_robot_main():
     while True:    
         if name == 'oCamS-1CGN-U': # oCamS-1CGN-U 카메라일 경우
             capture_result = True # 카메라로부터 이미지를 얻었다면 얻었다고 표시         
-            left_ = test.GetFrame(mode=2) # 좌우 카메라 이미지 얻음.
+            left_ = test.GetFrame(mode=2) # 카메라 이미지 얻음.
             
             left_ = cv2.cvtColor(left_, cv2.COLOR_BAYER_GB2BGR)
-            cv2.imwrite(costomer_face_img, left_) # 좌측 이미지 저장
+            cv2.imwrite(costomer_face_img, left_) # 이미지 저장
 
         else: # oCamS-1CGN-U 카메라가 아닐 경우
             print("error Not oCamS-1CGN-U")
