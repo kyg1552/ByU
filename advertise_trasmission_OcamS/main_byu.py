@@ -114,12 +114,12 @@ def byu_robot_main():
     start_time = time.time()
     stop_time = start_time + float(options.playtime)
 
-    ##### 카메라로부터 이미지 받기 시작 ####
     costomer_face_img = './costomer_image/' + cur_time + '.jpg' #이미지를 시간별로 저장
 
     frame_cnt = 0
     capture_result = False # 카메라가 정상적으로 동작해서 촬영을 했는지 확인하는 변수
-
+    
+    ##### 카메라로부터 이미지 받기 시작 ####
     # 오캠으로 영상 받기.
     while True:    
         if name == 'oCamS-1CGN-U': # oCamS-1CGN-U 카메라일 경우
