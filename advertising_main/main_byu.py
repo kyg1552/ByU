@@ -280,22 +280,22 @@ def byu_robot_main():
                 print("male: %d~%d"%(male_max_index*10,male_max_index*10+9))
                 if male_max_index == 0:
                     print("male video 10~")
-                    video_file = '~/byU_main/adv/male10.mp4'
+                    video_file = '/home/byu/byU_main/adv/male10.mp4'
                 elif male_max_index == 1:
 		    print("male video 20~")
-		    video_file = '~/byU_main/adv/male20.mp4'
+		    video_file = '/home/byu/byU_main/adv/male20.mp4'
 		elif male_max_index == 2:
 		    print("male video 30~")
-		    video_file = '~/byU_main/adv/male30.mp4'
+		    video_file = '/home/byu/byU_main/adv/male30.mp4'
                 elif male_max_index == 3:
 		    print("male video 40~")
-		    video_file = '~/byU_main/adv/male40.mp4'
+		    video_file = '/home/byu/byU_main/adv/male40.mp4'
                 elif male_max_index == 4:
 		    print("male video 50~")
-		    video_file = '~/byU_main/adv/male50.mp4'
+		    video_file = '/home/byu/byU_main/adv/male50.mp4'
                 elif male_max_index == 5:
 		    print("male video 60~")
-		    video_file = '~/byU_main/adv/male60.mp4'
+		    video_file = '/home/byu/byU_main/adv/male60.mp4'
             
                 clip = VideoFileClip(video_file)
                 clip.preview()
@@ -304,22 +304,22 @@ def byu_robot_main():
                 print("female: %d~%d"%(female_max_index*10,female_max_index*10+9))
                 if female_max_index == 0:
 		    print("female video 10~")
-		    video_file = '~/byU_main/adv/female10.mp4'
+		    video_file = '/home/byu/byU_main/adv/female10.mp4'
                 elif female_max_index == 1:
 		    print("female video 20~")
-		    video_file = '~/byU_main/adv/female20.mp4'
+		    video_file = '/home/byu/byU_main/adv/female20.mp4'
                 elif female_max_index == 2:
 		    print("female video 30~")
-		    video_file = '~/byU_main/adv/female30.mp4'
+		    video_file = '/home/byu/byU_main/adv/female30.mp4'
                 elif female_max_index == 3:
 		    print("female video 40~")
-		    video_file = '~/byU_main/adv/female40.mp4'
+		    video_file = '/home/byu/byU_main/adv/female40.mp4'
                 elif female_max_index == 4:
 		    print("female video 50~")
-		    video_file = '~/byU_main/adv/female50.mp4'
+		    video_file = '/home/byu/byU_main/adv/female50.mp4'
                 elif female_max_index == 5:
 		    print("female video 60~")
-		    video_file = '~/byU_main/adv/female60.mp4'
+		    video_file = '/home/byu/byU_main/adv/female60.mp4'
             
                 clip = VideoFileClip(video_file)
                 clip.preview()
