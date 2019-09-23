@@ -133,13 +133,13 @@ unsigned long  distance_Side_L;
 unsigned long  distance_Side_R;
 
 bool start_robot = false;
-int motor_forward_speed = 0; // 전진 속도 -: (x)
-int motor_turnR_speed = 0; // +: 우측(z)
-int motor_turnL_speed = 0; // -:좌측 회전속도(z)
-int motor_Uturn_speed = 0; // U턴 속도(z)
-int motor_moveTosideL_speed = 0; // +: 좌측으로 이동(y)
-int motor_moveTosideR_speed = 0; // -: 우측으로 이동(y)
-int spd = 2;
+float motor_forward_speed = 0; // 전진 속도 -: (x)
+float motor_turnR_speed = 0; // +: 우측(z)
+float motor_turnL_speed = 0; // -:좌측 회전속도(z)
+float motor_Uturn_speed = 0; // U턴 속도(z)
+float motor_moveTosideL_speed = 0; // +: 좌측으로 이동(y)
+float motor_moveTosideR_speed = 0; // -: 우측으로 이동(y)
+float spd = 2;
 
 int Uturn_delay = 1000; //ms
 int turn_delay = 500;
