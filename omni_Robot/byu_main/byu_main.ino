@@ -14,8 +14,9 @@
         모바일 플렛폼 3-omni wheel 제어
         초음파 센서 5개 이용 회피 알고리즘
         아두이노 전원 스위치, 모터 드라이버 릴레이 스위치
+        ROS 연동해서 rostopic으로 로봇 translation x, translation y, rotation z 값 제어
 
-  추가할 내용: ROS 연동해서 x,y,z 값 명령 전달 / 상부로 초음파 센서 값 전송
+  추가할 내용: 
 */
 
 #define _NAMIKI_MOTOR
