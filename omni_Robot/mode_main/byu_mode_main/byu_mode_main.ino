@@ -15,7 +15,7 @@
         초음파 센서 5개 이용 회피 알고리즘
         아두이노 전원 스위치, 모터 드라이버 릴레이 스위치
         ROS 연동해서 rostopic으로 로봇 translation x,translation y, rotation z 값 제어
-        제어 Mode 설정(AVOIDANCE_MODE = 1, FORWARD_MODE = 2, CIRCLE_MODE = 3, RECT_MDOE = 4, COMMAND_MODE = 5) 
+        제어 Mode 설정(AVOIDANCE_MODE = 1, FORWARD_MODE = 2, CIRCLE_MODE = 3, RECT_MODE = 4, COMMAND_MODE = 5) 
 
 
   추가할 내용: 
@@ -87,7 +87,7 @@
 #define  MAX_SPEEDRPM 8000 //최대 속도RPM
 #define  MAX_PWM 255  //PWM 값
 
-enum Mode { AVOIDANCE_MODE = 1, FORWARD_MODE, CIRCLE_MODE, RECT_MDOE, COMMAND_MODE };  
+enum Mode { AVOIDANCE_MODE = 1, FORWARD_MODE, CIRCLE_MODE, RECT_MODE, COMMAND_MODE };  
 
 // 변수 선언부
 // Motor Speed, DIR
@@ -533,7 +533,7 @@ void loop() {
       case CIRCLE_MODE:
           Circle_Mode();
           break;
-      case RECT_MDOE:
+      case RECT_MODE:
           Rectangle_Mode();
           break;
       case COMMAND_MODE:
