@@ -9,7 +9,7 @@
 #    Team        : By U(Capstone Design Project)
 #    Member      : Young-gi Kim, Geon-Hee Ryu, Eui-song Hwang, Byeong-Ho Lee
 #    Date        : 2019. 09.27
-#    Modified    : 이미지 속 얼굴 없을 경우에도 이전 누적 데이터로 광고 송출하도록 수정하고, 전체 시스템 클래스화 필요.
+#    Modified    : 
 #    Description :
 #    Reference   :
 #         https://potensj.tistory.com/73  - pip, pip3 install 중 permission 관련 오류 해결
