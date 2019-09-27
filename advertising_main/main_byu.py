@@ -8,8 +8,8 @@
 #    project     : Customized advertising transmission mobile robot using MicroSoft Face API
 #    Team        : By U(Capstone Design Project)
 #    Member      : Young-gi Kim, Geon-Hee Ryu, Eui-song Hwang, Byeong-Ho Lee
-#    Date        : 2019. 09.25
-#    Modified    : ocamS-1CGN-U사용하여 이미지 캡쳐(왼쪽 카메라만 사용)및 고객 데이터 기반 광고 송출 & DB 저장
+#    Date        : 2019. 09.27
+#    Modified    : 이미지 속 얼굴 없을 경우에도 이전 누적 데이터로 광고 송출하도록 수정하고, 전체 시스템 클래스화 필요.
 #    Description :
 #    Reference   :
 #         https://potensj.tistory.com/73  - pip, pip3 install 중 permission 관련 오류 해결
@@ -44,6 +44,8 @@ import cognitive_face as CF
 # Mongo DB
 import pymongo
 from pymongo import MongoClient
+
+from moviepy.editor import *  
 
 #아규먼트 받는 부분
 from optparse import OptionParser
@@ -89,7 +91,13 @@ collection = db.test
 
 gender_age_data = [] # 데이터 셋 4개씩 담을 리스트
 data_count = 0 # 이미지 처리한 횟수(프로세스 동작한 횟수 카운트)
-data_max = 40 # 처리할 이미지 갯수 약 4개 당 1분, 40개: 10분
+data_max = 4 # 처리할 이미지 갯수 약 4개 당 약 1분
+start_check = False # 데이터가 없는 경우, 디폴트 광고를 송출
+
+adv_check = False
+
+male_max_index = 0
+female_max_index = 0
 
 def byu_robot_main():
 
@@ -97,9 +105,15 @@ def byu_robot_main():
     global gender_age_data
     global collection
     global data_max
+    global start_check
+    global adv_check
+    global male_max_index
+    global female_max_index
 
     cur_place = options.place
     cur_time = time.strftime('%Y%m%d_%H%M%S') # 현재 연/월/일 시간:분:초
+    costomer_face_img = '/home/byu/byU_main/advertising_main/costomer_image/' + cur_time + '_' + cur_place + '.jpg' #이미지를 시간, 장소로 저장
+    
     # 오캠 구동을 위한 준비 과정
     devpath = liboCams.FindCamera('oCam')
     if devpath is None:
@@ -123,8 +137,6 @@ def byu_robot_main():
     stop_time = start_time + float(options.playtime)
 
     ##### 카메라로부터 이미지 받기 시작 ####
-    costomer_face_img = '/home/byu/byU_main/advertising_main/costomer_image/' + cur_time + '_' + cur_place + '.jpg' #이미지를 시간별로 저장
-    #costomer_face_img = '~/byU_main/advertising_DB/costomer_image/' + cur_time + '.jpg' #이미지를 시간별로 저장
 
     frame_cnt = 0
     capture_result = False # 카메라가 정상적으로 동작해서 촬영을 했는지 확인하는 변수
@@ -163,8 +175,9 @@ def byu_robot_main():
         faces = CF.face.detect(img_url, True, False, 'age,gender')
         
         if not faces: # 얼굴 감지되지 않은 경우
-            print("Not Detected Face!!") 
+            print("Not Detected Face!!")
         else: #얼굴 감지된 경우
+            start_check = True
             data = {}
             gender_age = []
             people = 0
@@ -192,10 +205,10 @@ def byu_robot_main():
             collection.insert_one(DB_data) # 고객 데이터 DB 저장
             #print(DB_data)
         
-            print("show all DB Data")
-            results = collection.find()
-            for result in results:
-                print(result)
+            #print("show all DB Data")
+            #results = collection.find()
+            #for result in results:
+            #    print(result)
 
 
             if data_count < data_max : ## 지금까지 처리한 데이터(이미지)가 4개 이하이면
@@ -208,47 +221,50 @@ def byu_robot_main():
             for gender_age in gender_age_data:  # 최근 데이터 4개 불러옴.
                 for gender, age in gender_age:  # 남자,여자 각 연령대별 숫자 카운트
                     if gender == 'male' and age >= 10 and age < 20:
-                        male[0] += 1
+                        male[5] += 1
                     elif gender == 'male' and age >= 20 and age < 30:
-                        male[1] += 1              
+                        male[4] += 1              
                     elif gender == 'male' and age >= 30 and age < 40:
-                        male[2] += 1                       
-                    elif gender == 'male' and age >= 40 and age < 50:
                         male[3] += 1                       
+                    elif gender == 'male' and age >= 40 and age < 50:
+                        male[2] += 1                       
                     elif gender == 'male' and age >= 50 and age < 60:
-                        male[4] += 1                       
+                        male[1] += 1                       
                     elif gender == 'male' and age >= 60 and age < 70:
-                        male[5] += 1                       
+                        male[0] += 1                       
                     elif gender == 'female' and age >= 10 and age < 20:
-                        female[0] += 1                      
+                        female[5] += 1                      
                     elif gender == 'female' and age >= 20 and age < 30:
-                        female[1] += 1                       
-                    elif gender == 'female' and age >= 30 and age < 40:
-                        female[2] += 1                       
-                    elif gender == 'female' and age >= 40 and age < 50:
-                        female[3] += 1                      
-                    elif gender == 'female' and age >= 50 and age < 60:
                         female[4] += 1                       
+                    elif gender == 'female' and age >= 30 and age < 40:
+                        female[3] += 1                       
+                    elif gender == 'female' and age >= 40 and age < 50:
+                        female[2] += 1                      
+                    elif gender == 'female' and age >= 50 and age < 60:
+                        female[1] += 1                       
                     elif gender == 'female' and age >= 60 and age < 70:
-                        female[5] += 1
+                        female[0] += 1
                            
-
+            male_max_index = male.argmax()
+            female_max_index = female.argmax()
+            adv_check = male[male_max_index] > female[female_max_index]
+                
             print("Now Detected People gender,age:")
             print(gender_age)
             print("Now Detected people: %d" %(people))
-            print("4 image male and female data")
-            print("male 10~19: %d"%(male[0]))
-            print("male 20~29: %d"%(male[1]))
-            print("male 30~39: %d"%(male[2]))
-            print("male 40~49: %d"%(male[3]))
-            print("male 50~59: %d"%(male[4]))
-            print("male 60~69: %d"%(male[5]))
-            print("female 10~19: %d"%(female[0]))
-            print("female 20~29: %d"%(female[1]))
-            print("female 30~39: %d"%(female[2]))
-            print("female 40~49: %d"%(female[3]))
-            print("female 50~59: %d"%(female[4]))
-            print("female 60~69: %d"%(female[5]))
+            print(str(data_max) + "image male and female data")
+            print("male 10~19: %d"%(male[5]))
+            print("male 20~29: %d"%(male[4]))
+            print("male 30~39: %d"%(male[3]))
+            print("male 40~49: %d"%(male[2]))
+            print("male 50~59: %d"%(male[1]))
+            print("male 60~69: %d"%(male[0]))
+            print("female 10~19: %d"%(female[5]))
+            print("female 20~29: %d"%(female[4]))
+            print("female 30~39: %d"%(female[3]))
+            print("female 40~49: %d"%(female[2]))
+            print("female 50~59: %d"%(female[1]))
+            print("female 60~69: %d"%(female[0]))
 
             ##### 이미지에서 얼굴을 찾아서 얼굴에서 특징(나이, 성별)추출 시작 ####
             """
@@ -272,27 +288,32 @@ def byu_robot_main():
         
             ##### 얼굴에서 추출된 정보를 이용하여 광고 추출 및 송출 시작 ###       
          
-            from moviepy.editor import *       
-            male_max_index = male.argmax()
-            female_max_index = female.argmax()
-            if male[male_max_index] > female[female_max_index]:
+             
+        if start_check == False: # 고객 데이터가 없는 경우 디폴트 임의의 광고 송출
+            print("Not costomer data") 
+            print("Default advertisement")
+            video_file = '/home/byu/byU_main/adv/female30.mp4'
+            clip = VideoFileClip(video_file)
+            clip.preview()
+        else:
+            if adv_check:
                 print("male: %d~%d"%(male_max_index*10,male_max_index*10+9))
-                if male_max_index == 0:
+                if male_max_index == 5:
                     print("male video 10~")
                     video_file = '/home/byu/byU_main/adv/male10.mp4'
-                elif male_max_index == 1:
-		    print("male video 20~")
+                elif male_max_index == 4:
+	            print("male video 20~")
 		    video_file = '/home/byu/byU_main/adv/male20.mp4'
-		elif male_max_index == 2:
+                elif male_max_index == 3:
 		    print("male video 30~")
 		    video_file = '/home/byu/byU_main/adv/male30.mp4'
-                elif male_max_index == 3:
+                elif male_max_index == 2:
 		    print("male video 40~")
 		    video_file = '/home/byu/byU_main/adv/male40.mp4'
-                elif male_max_index == 4:
+                elif male_max_index == 1:
 		    print("male video 50~")
 		    video_file = '/home/byu/byU_main/adv/male50.mp4'
-                elif male_max_index == 5:
+                elif male_max_index == 0:
 		    print("male video 60~")
 		    video_file = '/home/byu/byU_main/adv/male60.mp4'
             
@@ -301,30 +322,30 @@ def byu_robot_main():
         
             else:
                 print("female: %d~%d"%(female_max_index*10,female_max_index*10+9))
-                if female_max_index == 0:
-		    print("female video 10~")
-		    video_file = '/home/byu/byU_main/adv/female10.mp4'
-                elif female_max_index == 1:
-		    print("female video 20~")
+                if female_max_index == 5:
+	            print("female video 10~")
+	            video_file = '/home/byu/byU_main/adv/female10.mp4'
+                elif female_max_index == 4:
+	            print("female video 20~")
 		    video_file = '/home/byu/byU_main/adv/female20.mp4'
-                elif female_max_index == 2:
+                elif female_max_index == 3:
 		    print("female video 30~")
 		    video_file = '/home/byu/byU_main/adv/female30.mp4'
-                elif female_max_index == 3:
+                elif female_max_index == 2:
 		    print("female video 40~")
 		    video_file = '/home/byu/byU_main/adv/female40.mp4'
-                elif female_max_index == 4:
+                elif female_max_index == 1:
 		    print("female video 50~")
 		    video_file = '/home/byu/byU_main/adv/female50.mp4'
-                elif female_max_index == 5:
+                elif female_max_index == 0:
 		    print("female video 60~")
 		    video_file = '/home/byu/byU_main/adv/female60.mp4'
             
                 clip = VideoFileClip(video_file)
                 clip.preview()
             
-            #img.close()
-            ##### 얼굴에서 추출된 정보를 이용하여 광고 추출 및 송출 끝 ####
+        #img.close()
+        ##### 얼굴에서 추출된 정보를 이용하여 광고 추출 및 송출 끝 ####
     else: # 카메라가 정상적으로 동작 안한 경우
         print("error: No Face!! or No Camera!!")
         print("Please Check camera")    
