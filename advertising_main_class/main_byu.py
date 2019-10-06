@@ -8,7 +8,7 @@
 #    project     : Customized advertising transmission mobile robot using MicroSoft Face API
 #    Team        : By U(Capstone Design Project)
 #    Member      : Young-gi Kim, Geon-Hee Ryu, Eui-song Hwang, Byeong-Ho Lee
-#    Date        : 2019. 10. 05
+#    Date        : 2019. 10. 06
 #    Modified    :
 #    Description :
 #    Reference   :
@@ -64,6 +64,7 @@ class Byu:
         self.cur_time = time.strftime('%Y%m%d_%H%M%S') # 현재 연/월/일 시간:분:초
 
         #self.collection = MongoClient("localhost", 27017).test.test
+        #self.results_DB
 
         self.gender_age_data = [] # 데이터 셋 4개씩 담을 리스트
         self.data_count = 0 # 이미지 처리한 횟수(프로세스 동작한 횟수 카운트)
@@ -93,9 +94,19 @@ class Byu:
         rect = faceDictionary['faceRectangle']
         left = rect['left']
         top = rect['top']
-        bottom = left + rect['height']
         right = top + rect['width']
         return (left, right)
+    
+    def getRectangleFont2(self, faceDictionary):
+        rect = faceDictionary['faceRectangle']
+        left = rect['left']
+        return (left)
+
+    def getRectangleFont3(self, faceDictionary):
+        rect = faceDictionary['faceRectangle']
+        top = rect['top']
+        right = top + rect['width'] 
+        return (right)
     
     def faceBounding(self, img_url, faces):
         ####show Face BBox and numbering
@@ -119,9 +130,13 @@ class Byu:
     """
     def writeDB(self, db_data):
         self.collection.insert_one(db_data) # 고객 데이터 DB 저장
-        
+    
+    def readDB(self):
         print("show all DB Data")       
         results = self.collection.find()
+        return results
+
+    def printDB(self, results):
         for result in results:
             print(result)
     """
