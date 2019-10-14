@@ -8,7 +8,7 @@
 #    project     : Customized advertising transmission mobile robot using MicroSoft Face API
 #    Team        : By U(Capstone Design Project)
 #    Member      : Young-gi Kim, Geon-Hee Ryu, Eui-song Hwang, Byeong-Ho Lee
-#    Date        : 2019. 10. 06
+#    Date        : 2019. 10. 14
 #    Modified    :
 #    Description :
 #    Reference   :
@@ -48,10 +48,10 @@ import cognitive_face as CF
 from moviepy.editor import *  
 
 #face api key 받아서 사용하는 부분
-KEY = '819a2da808d24811a7b9fa765545a0ad' #재홍
+KEY = 'e98d8be90e124f06a7824e9a643aea1a' # 11월 10일까지
 CF.Key.set(KEY)
 
-BASE_URL = 'https://bora.cognitiveservices.azure.com/face/v1.0'
+BASE_URL = 'https://bora123.cognitiveservices.azure.com/face/v1.0'
 CF.BaseUrl.set(BASE_URL)
 
 class Byu:
@@ -78,7 +78,7 @@ class Byu:
         self.female_max_index = 0
         self.costomer_face_img = " "
 
-        self.video_file = '/home/younggi/byU_main/adv/female30_QR.mp4'
+        self.video_file = '/home/byu/byU_main/adv/female30_QR.mp4'
 
     ##### 이미지에서 얼굴을 찾아서 bounding box 시작 ####
     # Convert width height to a point in a rectangle
@@ -142,7 +142,7 @@ class Byu:
     """
     def getImage(self): # 웹캠 버전
         self.cur_time = time.strftime('%Y%m%d_%H%M%S') # 현재 연/월/일 시간:분:초
-        self.costomer_face_img = '/home/younggi/byU_main/advertising_main_class/costomer_image/' + self.cur_time + '_' + self.cur_place + '.jpg' #이미지를 시간, 장소로 저장
+        self.costomer_face_img = '/home/byu/byU_main/advertising_main_class/costomer_image/' + self.cur_time + '_' + self.cur_place + '.jpg' #이미지를 시간, 장소로 저장
         cap = cv2.VideoCapture(0) # using USB0
 
         self.capture_result = False
@@ -169,7 +169,7 @@ class Byu:
     
     def getImageOcamS(self): # ocam으로 이미지 받기
         self.cur_time = time.strftime('%Y%m%d_%H%M%S') # 현재 연/월/일 시간:분:초
-        self.costomer_face_img = '/home/byu/byU_main/advertising_main/costomer_image/' + cur_time + '_' + self.cur_place + '.jpg' #이미지를 시간, 장소로 저장
+        self.costomer_face_img = '/home/byu/byU_main/advertising_main_class/costomer_image/' + self.cur_time + '_' + self.cur_place + '.jpg' #이미지를 시간, 장소로 저장
 
         # 오캠 구동을 위한 준비 과정
         devpath = liboCams.FindCamera('oCam')
@@ -325,22 +325,22 @@ class Byu:
                 print("male: %d~%d"%(self.male_max_index*10,self.male_max_index*10+9))
                 if self.male_max_index == 5:
                     print("male video 10~")
-                    self.video_file = '/home/younggi/byU_main/adv/male10_QR.mp4'
+                    self.video_file = '/home/byu/byU_main/adv/male10_QR.mp4'
                 elif self.male_max_index == 4:
                     print("male video 20~")
-                    self.video_file = '/home/younggi/byU_main/adv/male20_QR.mp4'
+                    self.video_file = '/home/byu/byU_main/adv/male20_QR.mp4'
                 elif self.male_max_index == 3:
                     print("male video 30~")
-                    self.video_file = '/home/younggi/byU_main/adv/male30_QR.mp4'
+                    self.video_file = '/home/byu/byU_main/adv/male30_QR.mp4'
                 elif self.male_max_index == 2:
                     print("male video 40~")
-                    self.video_file = '/home/younggi/byU_main/adv/male40_QR.mp4'
+                    self.video_file = '/home/byu/byU_main/adv/male40_QR.mp4'
                 elif self.male_max_index == 1:
                     print("male video 50~")
-                    self.video_file = '/home/younggi/byU_main/adv/male50_QR.mp4'
+                    self.video_file = '/home/byu/byU_main/adv/male50_QR.mp4'
                 elif self.male_max_index == 0:
                     print("male video 60~")
-                    self.video_file = '/home/younggi/byU_main/adv/male60_QR.mp4'
+                    self.video_file = '/home/byu/byU_main/adv/male60_QR.mp4'
                     
                 clip = VideoFileClip(self.video_file)
                 clip.preview()
@@ -348,28 +348,28 @@ class Byu:
                 print("female: %d~%d"%(self.female_max_index*10,self.female_max_index*10+9))
                 if self.female_max_index == 5:
                     print("female video 10~")
-                    self.video_file = '/home/younggi/byU_main/adv/female10_QR.mp4'
+                    self.video_file = '/home/byu/byU_main/adv/female10_QR.mp4'
                 elif self.female_max_index == 4:
                     print("female video 20~")
-                    self.video_file = '/home/younggi/byU_main/adv/female20_QR.mp4'
+                    self.video_file = '/home/byu/byU_main/adv/female20_QR.mp4'
                 elif self.female_max_index == 3:
                     print("female video 30~")
-                    self.video_file = '/home/younggi/byU_main/adv/female30_QR.mp4'
+                    self.video_file = '/home/byu/byU_main/adv/female30_QR.mp4'
                 elif self.female_max_index == 2:
                     print("female video 40~")
-                    self.video_file = '/home/younggi/byU_main/adv/female40_QR.mp4'
+                    self.video_file = '/home/byu/byU_main/adv/female40_QR.mp4'
                 elif self.female_max_index == 1:
                     print("female video 50~")
-                    self.video_file = '/home/younggi/byU_main/adv/female50_QR.mp4'
+                    self.video_file = '/home/byu/byU_main/adv/female50_QR.mp4'
                 elif self.female_max_index == 0:
                     print("female video 60~")
-                    self.video_file = '/home/younggi/byU_main/adv/female60_QR.mp4'
+                    self.video_file = '/home/byu/byU_main/adv/female60_QR.mp4'
             
                 clip = VideoFileClip(self.video_file)
                 clip.preview()
               ##### 얼굴에서 추출된 정보를 이용하여 광고 추출 및 송출 끝 ####
     def advertising(self):
-        self.getImage()
+        self.getImageOcamS()
         #self.getImageOcams()
         if self.capture_result == True: # 카메라가 정상적으로 동작한 경우         
             self.getFeature()
@@ -380,7 +380,7 @@ class Byu:
             print("Please Check camera")    
 
 if __name__ == '__main__':
-    byu_start = ByU(4, "Deajeon_univ", 1, 5)
+    byu_start = Byu(4, "Deajeon_univ", 1, 0)
     try:
         while True:
             byu_start.advertising()
