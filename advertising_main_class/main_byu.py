@@ -8,7 +8,7 @@
 #    project     : Customized advertising transmission mobile robot using MicroSoft Face API
 #    Team        : By U(Capstone Design Project)
 #    Member      : Young-gi Kim, Geon-Hee Ryu, Eui-song Hwang, Byeong-Ho Lee
-#    Date        : 2019. 10. 10
+#    Date        : 2019. 10. 16
 #    Modified    :
 #    Description :
 #    Reference   :
