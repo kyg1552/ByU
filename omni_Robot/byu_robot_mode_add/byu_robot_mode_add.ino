@@ -2,7 +2,7 @@
 
   작성자: youngi-gi kim, Byeong-ho Lee
 
-  최종 수정일: 2019.10.01
+  최종 수정일: 2019.10.16
   참고자료: https://github.com/lupusorina/nexus-robots : NEXUS_ROBOT demo-code 및 Library
            https://simsamo.tistory.com/13?category=700958 : filter
            http://docs.ros.org/api/geometry_msgs/html/msg/Transform.html
@@ -17,7 +17,7 @@
         ROS 연동해서 rostopic으로 로봇 translation x,translation y, rotation z 값 제어
 
 
-  추가할 내용: 
+  추가할 내용:
 */
 
 #define _NAMIKI_MOTOR
@@ -75,6 +75,10 @@
 //모터드라이버 릴레이 핀
 #define MOTOR_DRIVER_RELAY 37
 
+//IR센서 핀
+#define IR_SENSOR 40
+bool IR_sensor_check = false;
+
 // Omni Body 관련 정의부
 #define NR_OMNIWHEELS 3 // 옴니휠 갯수
 #define BODY_RADIUS  160 //mm 로봇 반지름
@@ -86,7 +90,7 @@
 #define  MAX_SPEEDRPM 8000 //최대 속도RPM
 #define  MAX_PWM 255  //PWM 값
 
-enum Mode { AVOIDANCE_MODE = 1, FORWARD_MODE, CIRCLE_MODE, RECT_MDOE, COMMAND_MODE };  
+enum Mode { AVOIDANCE_MODE = 1, FORWARD_MODE, CIRCLE_MODE, RECT_MDOE, COMMAND_MODE };
 
 // 변수 선언부
 // Motor Speed, DIR
@@ -144,7 +148,7 @@ float motor_turnL_speed = 0.0; // -:좌측 회전속도(z)
 float motor_moveTosideL_speed = 0.0; // +: 좌측으로 이동(y)
 float motor_moveTosideR_speed = 0.0; // -: 우측으로 이동(y)
 
-float f_decay_rate = 0.7; //전방 장애물 감지 시 속도 감속률 
+float f_decay_rate = 0.7; //전방 장애물 감지 시 속도 감속률
 float side_decay_rate = 0.7; // 좌,우 이동 후 반대로 이동 시 속도 감속률
 
 int front_check = 0;
@@ -164,15 +168,15 @@ ros::NodeHandle nh;
 void Byu_Cb(const geometry_msgs::Transform& byu_val) // 명령 값 받아서 byu robot 제어
 {
   motor_forward_speed = byu_val.translation.x;
-  if(motor_forward_speed > forward_speed_max) motor_forward_speed = forward_speed_max;
+  if (motor_forward_speed > forward_speed_max) motor_forward_speed = forward_speed_max;
   motor_forward_speed = -motor_forward_speed;
- 
+
   motor_moveTosideR_speed = byu_val.translation.y;
-  if(motor_moveTosideR_speed > side_speed_max) motor_moveTosideR_speed = side_speed_max;
+  if (motor_moveTosideR_speed > side_speed_max) motor_moveTosideR_speed = side_speed_max;
   motor_moveTosideL_speed = -motor_moveTosideR_speed;
- 
+
   motor_turnR_speed = byu_val.rotation.z;
-  if(motor_turnR_speed > turn_speed_max) motor_turnR_speed = turn_speed_max;
+  if (motor_turnR_speed > turn_speed_max) motor_turnR_speed = turn_speed_max;
   motor_turnL_speed = -motor_turnR_speed;
 
   start_robot = true;
@@ -189,20 +193,29 @@ ros::Subscriber<geometry_msgs::Transform> sub("/byu_control", Byu_Cb); //제어�
 //////////////////////////////////////////////////////////////
 void Collision_Avoidance() {
 
-  if (distance_F <= front_detection_distance1) { // 전방에 장애물이 감지되면
-    drive_line_body_frame(motor_forward_speed * f_decay_rate , 0, 0, 0); //속도감소
-    if (distance_F <= front_detection_distance2) {  // 정면이 막혔을 때
-      drive_line_body_frame(0, 0, 0, front_delay); //정지
-      front_check+=1;
-      if(front_check >= 30){ // 20-> 1s 
-        drive_line_body_frame(0, 0, motor_turnR_speed, turn_delay*6);
-        front_check = 0;
+  if (IR_sensor_check == true)
+  {
+    drive_line_body_frame(0, 0, 0, 100);
+    drive_line_body_frame(-motor_forward_speed, 0, 0, 2000); //속도감소
+    drive_line_body_frame(0, 0, motor_turnR_speed, turn_delay * 6);
+  }
+  else
+  {
+    if (distance_F <= front_detection_distance1) { // 전방에 장애물이 감지되면
+      drive_line_body_frame(motor_forward_speed * f_decay_rate , 0, 0, 0); //속도감소
+      if (distance_F <= front_detection_distance2) {  // 정면이 막혔을 때
+        drive_line_body_frame(0, 0, 0, front_delay); //정지
+        front_check += 1;
+        if (front_check >= 30) { // front_check +1 -> +1s
+          drive_line_body_frame(0, 0, motor_turnR_speed, turn_delay * 6);
+          front_check = 0;
+        }
+        Avoidance_Check();
       }
+    }
+    else { // 전방에 장애물 감지 안되었을 때정면이 안 막혔을 때
       Avoidance_Check();
     }
-  }
-  else { // 전방에 장애물 감지 안되었을 때정면이 안 막혔을 때
-    Avoidance_Check();
   }
   drive_line_body_frame(motor_forward_speed, 0, 0, 0);  // 정상주행 앞으로
 }
@@ -258,6 +271,8 @@ void SetupUltraPin() {
 
 long Read_distance() {
   // 이전 측정 값에 비중을 두고, 현재 측정된 값엔 비중을 낮춤.
+  IR_sensor_check = digitalRead(IR_SENSOR);
+
   distance_F = UltraSonic(TRIG_Front, ECHO_Front);
   distance_F = round((alpha * distance_F) + ( beta * pre_distance_F));
   if (distance_F < DIST_MIN) distance_F = DIST_MAX * 2; // 최소 측정 거리 이하이면 물체가 측정거리 밖에 있다고 본다.
@@ -472,30 +487,30 @@ void RightrunPWM(unsigned int PWM, bool dir) {
   analogWrite(RIGHT_PWM, PWM);
 }
 
-void Advoidance_Mode(){
-  
+void Advoidance_Mode() {
+
   cur_time = millis();
   if (cur_time - pre_time >= mtime) // 50ms 마다 초음파 측정
   {
-      Read_distance(); // 초음파 센서 값 읽는 부분   
-      Collision_Avoidance(); // 충돌회피 알고리즘으로 모바일 로봇 구동
-      pre_time = cur_time ;
-  } 
- 
+    Read_distance(); // 초음파 센서 값 읽는 부분
+    Collision_Avoidance(); // 충돌회피 알고리즘으로 모바일 로봇 구동
+    pre_time = cur_time ;
+  }
+
 }
-void Forward_Mode(){
+void Forward_Mode() {
   drive_line_body_frame(motor_forward_speed, 0, 0, 0);
 }
-void Circle_Mode(){
+void Circle_Mode() {
   drive_line_body_frame(motor_forward_speed, motor_moveTosideR_speed, motor_turnR_speed, 0);
 }
-void Rectangle_Mode(){
+void Rectangle_Mode() {
   drive_line_body_frame(motor_forward_speed, 0, 0, 3000);
   drive_line_body_frame(0, motor_moveTosideR_speed, 0, 3000);
   drive_line_body_frame(-motor_forward_speed, 0, 0, 3000);
   drive_line_body_frame(0, -motor_moveTosideR_speed, 0, 3000);
 }
-void Command_Mode(){
+void Command_Mode() {
   drive_line_body_frame(motor_forward_speed, motor_moveTosideR_speed, motor_turnR_speed, 0);
 }
 
@@ -508,6 +523,7 @@ void setup() {
   SetInterruptPin(); //인터럽트 핀 설정
   SetupMotorPin();  // Motor Pin 설정
   SetupUltraPin();  // Ultra Pin 설정
+  pinMode(IR_SENSOR, INPUT);
 
   nh.initNode();
   nh.subscribe(sub);
@@ -533,31 +549,31 @@ void loop() {
 
   /*cur_time = millis();
 
-  if (cur_time - pre_time >= mtime) // 50ms 마다 초음파 측정
-  {
-      Read_distance(); // 초음파 센서 값 읽는 부분   
-      
+    if (cur_time - pre_time >= mtime) // 50ms 마다 초음파 측정
+    {
+      Read_distance(); // 초음파 센서 값 읽는 부분
+
       pre_time = cur_time ;
-  }*/
+    }*/
 
   if ( start_robot == true)
   {
-    switch(robot_mode){
+    switch (robot_mode) {
       case AVOIDANCE_MODE:
-          Advoidance_Mode();
-          break;
+        Advoidance_Mode();
+        break;
       case FORWARD_MODE:
-          Forward_Mode();
-          break;
+        Forward_Mode();
+        break;
       case CIRCLE_MODE:
-          Circle_Mode();
-          break;
+        Circle_Mode();
+        break;
       case RECT_MDOE:
-          Rectangle_Mode();
-          break;
+        Rectangle_Mode();
+        break;
       case COMMAND_MODE:
-          Command_Mode();
-          break;
+        Command_Mode();
+        break;
     }
   }
 }
