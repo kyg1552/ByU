@@ -1,4 +1,4 @@
-    #-*- coding: utf-8 -*-
+#-*- coding: utf-8 -*-
 #! /usr/bin/env python2
 
 #    Documentation
@@ -253,7 +253,7 @@ class Byu:
         test.Close()
         ##### 카메라로부터 이미지 받기 끝 ####
     
-    def img_histequalize(self, original_img, precessing_img)
+    def img_histequalize(self, original_img, precessing_img):
         img = cv2.imread(original_img)
         
         img_yuv = cv2.cvtColor(img, cv2.COLOR_BGR2YUV)
