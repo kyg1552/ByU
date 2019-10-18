@@ -36,7 +36,7 @@ BASE_URL = 'https://bora123.cognitiveservices.azure.com/face/v1.0'
 CF.BaseUrl.set(BASE_URL)
 
 class Byu:
-    def __init__(self, group, data_max, place, playtime, resolution_index):
+    def __init__(self, group, image_stack, place, playtime, resolution_index):
         
         self.playtime = playtime
         self.cur_place = place
@@ -51,7 +51,7 @@ class Byu:
 
         self.gender_age_data = [] # 데이터 셋 4개씩 담을 리스트
         self.data_count = 0 # 이미지 처리한 횟수(프로세스 동작한 횟수 카운트)
-        self.data_max = data_max # 처리할 이미지 갯수 약 4개 당 약 1분
+        self.image_stack = image_stack # 처리할 이미지 갯수 약 4개 당 약 1분
         
         self.start_check = False # 데이터가 없는 경우, 디폴트 광고를 송출
         self.adv_check = False
@@ -166,7 +166,7 @@ class Byu:
         for result in results:
             print(result)
     
-    def getImage(self): # 웹캠 버전
+    def getImage(self, mode = 'day'): # 웹캠 버전
         self.cur_time = time.strftime('%Y%m%d_%H%M%S') # 현재 연/월/일 시간:분:초
         self.costomer_face_img = '/home/byu/byU_main/advertising_main/costomer_image/' + self.cur_time + '_' + self.cur_place + '.jpg' #이미지를 시간, 장소로 저장
         self.processing_img = '/home/byu/byU_main/advertising_main/processing_image/' + self.cur_time + '_' + self.cur_place + '_p.jpg' #히스토그램 평활화한 이미지 저장 파일명
@@ -181,7 +181,8 @@ class Byu:
                 if ret:
                     self.capture_result = True
                     cv2.imwrite(self.costomer_face_img, frame)
-                    self.img_histequalize(self.costomer_face_img, self.processing_img) # 히스토그램 평활화한 이미지 저장
+                    if mode == 'night':
+                        self.img_histequalize(self.costomer_face_img, self.processing_img) # 히스토그램 평활화한 이미지 저장
                     break
                 else:
                     self.capture_result = False
@@ -195,7 +196,7 @@ class Byu:
         cv2.destroyAllWindows()
         
     
-    def getImageOcamS(self): # ocam으로 이미지 받기
+    def getImageOcamS(self, mode = 'day'): # ocam으로 이미지 받기
         self.cur_time = time.strftime('%Y%m%d_%H%M%S') # 현재 연/월/일 시간:분:초
         self.costomer_face_img = '/home/byu/byU_main/advertising_main/costomer_image/' + self.cur_time + '_' + self.cur_place + '.jpg' #이미지를 시간, 장소로 저장
         self.processing_img = '/home/byu/byU_main/advertising_main/processing_image/' + self.cur_time + '_' + self.cur_place + '_p.jpg' #히스토그램 평활화한 이미지 저장 파일명
@@ -234,8 +235,8 @@ class Byu:
                 
                 left_ = cv2.cvtColor(left_, cv2.COLOR_BAYER_GB2BGR)
                 cv2.imwrite(self.costomer_face_img, left_) # 좌측 이미지 저장
-
-                self.img_histequalize(self.costomer_face_img, self.processing_img) # 히스토그램 평활화한 이미지 저장
+                if mode == 'night':
+                    self.img_histequalize(self.costomer_face_img, self.processing_img) # 히스토그램 평활화한 이미지 저장
             else: # oCamS-1CGN-U 카메라가 아닐 경우
                 print("Error Not oCamS-1CGN-U")
             
@@ -298,10 +299,10 @@ class Byu:
             
             self.writeDB(DB_data)
 
-            if self.data_count < self.data_max : ## 지금까지 처리한 데이터(이미지)가 4개 이하이면
+            if self.data_count < self.image_stack : ## 지금까지 처리한 데이터(이미지)가 4개 이하이면
                 self.gender_age_data.insert(0, gender_age) ## 맨 처음에 그대로 새로운 데이터 삽입(전체 데이터 셋에 추가)
             else: ## 지금까지 처리한 데이터(이미지)가 4개 초과이면(5개부터)
-                del self.gender_age_data[self.data_max-1] ## 맨 처음 들어온 데이터(마지막 인덱스) 삭제
+                del self.gender_age_data[self.image_stack-1] ## 맨 처음 들어온 데이터(마지막 인덱스) 삭제
                 self.gender_age_data.insert(0, gender_age) ## 맨 처음에 새로운 데이터 삽입
             self.data_count +=1
 
@@ -339,7 +340,7 @@ class Byu:
             print("Now Detected People gender,age:")
             print(gender_age)
             print("Now Detected people: %d" %(people))
-            print(str(self.data_max) + " image male and female data")
+            print(str(self.image_stack) + " image male and female data")
             print("male 10~19: %d"%(male[5]))
             print("male 20~29: %d"%(male[4]))
             print("male 30~39: %d"%(male[3]))
@@ -407,24 +408,39 @@ class Byu:
                 clip = VideoFileClip(self.video_file)
                 clip.preview()
               ##### 얼굴에서 추출된 정보를 이용하여 광고 추출 및 송출 끝 ####
-    def advertising(self):
-        self.getImageOcamS()
-        self.findperson(self.group, self.processing_img) # 찾고자 하는 사람 찾기
+    def advertising(self,mode):
+        if mode == 'day':
+            self.getImageOcamS()
+            self.findperson(self.group, self.costomer_face_img) # 찾고자 하는 사람 찾기
 
-        if self.capture_result == True: # 카메라가 정상적으로 동작한 경우         
-            self.getFeature(self.processing_img)
-            #self.printDB(self.readDB()) # DB에 저장된 데이터 출력
-            self.display()
-                    
-        else: # 카메라가 정상적으로 동작 안한 경우
-            print("error: No Face!! or No Camera!!")
-            print("Please Check camera")    
+            if self.capture_result == True: # 카메라가 정상적으로 동작한 경우         
+                self.getFeature(self.costomer_face_img)
+                #self.printDB(self.readDB()) # DB에 저장된 데이터 출력
+                self.display()
+                        
+            else: # 카메라가 정상적으로 동작 안한 경우
+                print("error: No Face!! or No Camera!!")
+                print("Please Check camera")
+
+        elif mode == 'night':   
+            self.getImageOcamS(mode = 'night')
+            self.findperson(self.group, self.processing_img) # 찾고자 하는 사람 찾기
+
+            if self.capture_result == True: # 카메라가 정상적으로 동작한 경우         
+                self.getFeature(self.processing_img)
+                #self.printDB(self.readDB()) # DB에 저장된 데이터 출력
+                self.display()
+                        
+            else: # 카메라가 정상적으로 동작 안한 경우
+                print("error: No Face!! or No Camera!!")
+                print("Please Check camera")    
 
 if __name__ == '__main__':
-    byu_start = Byu(group = 'register4',data_max = 4,place = "Deajeon_univ",playtime = 1, resolution_index = 5) # find_group, image_stack, place, camera_playtime, resolution_index
+    byu_start = Byu(image_stack = 4,place = "Deajeon_univ",playtime = 1, resolution_index = 5, group = 'register4') # find_group, image_stack, place, camera_playtime, resolution_index
     try:
         while True:
-            byu_start.advertising()
+            #byu_start.advertising(mode = 'day') #주간 혹은 밝은 곳에서 광고 디스플레이
+            byu_start.advertising(mode = 'night') #야간 혹은 주변이 어두운 곳에서 광고 디스플레이
     except KeyboardInterrupt:
         print("KeyboardInterrupt!!")
         cv2.destroyAllWindows()
