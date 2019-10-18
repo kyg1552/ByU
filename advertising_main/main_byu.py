@@ -169,7 +169,7 @@ class Byu:
     def getImage(self): # 웹캠 버전
         self.cur_time = time.strftime('%Y%m%d_%H%M%S') # 현재 연/월/일 시간:분:초
         self.costomer_face_img = '/home/byu/byU_main/advertising_main/costomer_image/' + self.cur_time + '_' + self.cur_place + '.jpg' #이미지를 시간, 장소로 저장
-        self.processing_img = '/home/byu/byU_main/advertising_main/processing_image/' + self.cur_time + '_' + self.cur_place + 'p.jpg' #히스토그램 평활화한 이미지 저장 파일명
+        self.processing_img = '/home/byu/byU_main/advertising_main/processing_image/' + self.cur_time + '_' + self.cur_place + '_p.jpg' #히스토그램 평활화한 이미지 저장 파일명
         cap = cv2.VideoCapture(1) # using USB camera
 
         self.capture_result = False
@@ -198,7 +198,7 @@ class Byu:
     def getImageOcamS(self): # ocam으로 이미지 받기
         self.cur_time = time.strftime('%Y%m%d_%H%M%S') # 현재 연/월/일 시간:분:초
         self.costomer_face_img = '/home/byu/byU_main/advertising_main/costomer_image/' + self.cur_time + '_' + self.cur_place + '.jpg' #이미지를 시간, 장소로 저장
-        self.processing_img = '/home/byu/byU_main/advertising_main/processing_image/' + self.cur_time + '_' + self.cur_place + 'p.jpg' #히스토그램 평활화한 이미지 저장 파일명
+        self.processing_img = '/home/byu/byU_main/advertising_main/processing_image/' + self.cur_time + '_' + self.cur_place + '_p.jpg' #히스토그램 평활화한 이미지 저장 파일명
         # 오캠 구동을 위한 준비 과정
         devpath = liboCams.FindCamera('oCam')
         if devpath is None:
@@ -297,7 +297,6 @@ class Byu:
                 people += 1
             
             self.writeDB(DB_data)
-            self.printDB(self.readDB())
 
             if self.data_count < self.data_max : ## 지금까지 처리한 데이터(이미지)가 4개 이하이면
                 self.gender_age_data.insert(0, gender_age) ## 맨 처음에 그대로 새로운 데이터 삽입(전체 데이터 셋에 추가)
@@ -410,10 +409,11 @@ class Byu:
               ##### 얼굴에서 추출된 정보를 이용하여 광고 추출 및 송출 끝 ####
     def advertising(self):
         self.getImageOcamS()
-        self.findperson(self.group, self.processing_img)
+        self.findperson(self.group, self.processing_img) # 찾고자 하는 사람 찾기
 
         if self.capture_result == True: # 카메라가 정상적으로 동작한 경우         
             self.getFeature(self.processing_img)
+            #self.printDB(self.readDB()) # DB에 저장된 데이터 출력
             self.display()
                     
         else: # 카메라가 정상적으로 동작 안한 경우
@@ -421,7 +421,7 @@ class Byu:
             print("Please Check camera")    
 
 if __name__ == '__main__':
-    byu_start = Byu('register4', 4, "Deajeon_univ", 1, 0)
+    byu_start = Byu(group = 'register4',data_max = 4,place = "Deajeon_univ",playtime = 1, resolution_index = 5) # find_group, image_stack, place, camera_playtime, resolution_index
     try:
         while True:
             byu_start.advertising()
