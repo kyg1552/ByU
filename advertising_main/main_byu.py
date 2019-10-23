@@ -36,7 +36,7 @@ BASE_URL = 'https://bora123.cognitiveservices.azure.com/face/v1.0'
 CF.BaseUrl.set(BASE_URL)
 
 class Byu:
-    def __init__(self, group, image_stack, place, playtime, resolution_index):
+    def __init__(self, group, image_queue, place, playtime, resolution_index):
         
         self.playtime = playtime
         self.cur_place = place
@@ -51,7 +51,7 @@ class Byu:
 
         self.gender_age_data = [] # 데이터 셋 4개씩 담을 리스트
         self.data_count = 0 # 이미지 처리한 횟수(프로세스 동작한 횟수 카운트)
-        self.image_stack = image_stack # 처리할 이미지 갯수 약 4개 당 약 1분
+        self.image_queue = image_queue # 처리할 이미지 갯수 약 4개 당 약 1분
         
         self.start_check = False # 데이터가 없는 경우, 디폴트 광고를 송출
         self.adv_check = False
@@ -145,7 +145,7 @@ class Byu:
         for face in faces: # 캡쳐한 이미지의 얼굴들 빨간색 사각형 밑 번호 표시
             draw.rectangle(self.getRectangle(face), outline='red')
             n = str(k)
-            draw.text(self.getRectangleFont(face),n,font=None,fill=(100,255,100,255))
+            draw.text(self.getRectangleFont(face),n,font=None,fill=(100,0,100,100))
             k += 1
 
         # Display the image in the users default image browser.
@@ -272,7 +272,7 @@ class Byu:
         if not faces: # 얼굴 감지되지 않은 경우
             print("Can't Detected Face!! No get costomer Feature")
         else: #얼굴 감지된 경우
-            self.faceBounding(img_url,faces)
+            #self.faceBounding(img_url,faces)
             self.start_check = True
             data = {}
             gender_age = []
@@ -299,10 +299,10 @@ class Byu:
             
             self.writeDB(DB_data)
 
-            if self.data_count < self.image_stack : ## 지금까지 처리한 데이터(이미지)가 4개 이하이면
+            if self.data_count < self.image_queue : ## 지금까지 처리한 데이터(이미지)가 4개 이하이면
                 self.gender_age_data.insert(0, gender_age) ## 맨 처음에 그대로 새로운 데이터 삽입(전체 데이터 셋에 추가)
             else: ## 지금까지 처리한 데이터(이미지)가 4개 초과이면(5개부터)
-                del self.gender_age_data[self.image_stack-1] ## 맨 처음 들어온 데이터(마지막 인덱스) 삭제
+                del self.gender_age_data[self.image_queue-1] ## 맨 처음 들어온 데이터(마지막 인덱스) 삭제
                 self.gender_age_data.insert(0, gender_age) ## 맨 처음에 새로운 데이터 삽입
             self.data_count +=1
 
@@ -340,7 +340,7 @@ class Byu:
             print("Now Detected People gender,age:")
             print(gender_age)
             print("Now Detected people: %d" %(people))
-            print(str(self.image_stack) + " image male and female data")
+            print(str(self.image_queue) + " image male and female data")
             print("male 10~19: %d"%(male[5]))
             print("male 20~29: %d"%(male[4]))
             print("male 30~39: %d"%(male[3]))
@@ -416,7 +416,7 @@ class Byu:
             if self.capture_result == True: # 카메라가 정상적으로 동작한 경우         
                 self.getFeature(self.costomer_face_img)
                 #self.printDB(self.readDB()) # DB에 저장된 데이터 출력
-                self.display()
+                #self.display()
                         
             else: # 카메라가 정상적으로 동작 안한 경우
                 print("error: No Face!! or No Camera!!")
@@ -429,18 +429,18 @@ class Byu:
             if self.capture_result == True: # 카메라가 정상적으로 동작한 경우         
                 self.getFeature(self.processing_img)
                 #self.printDB(self.readDB()) # DB에 저장된 데이터 출력
-                self.display()
+                #self.display()
                         
             else: # 카메라가 정상적으로 동작 안한 경우
                 print("error: No Face!! or No Camera!!")
                 print("Please Check camera")    
 
 if __name__ == '__main__':
-    byu_start = Byu(image_stack = 4,place = "Deajeon_univ",playtime = 1, resolution_index = 5, group = 'register4') # find_group, image_stack, place, camera_playtime, resolution_index
+    byu_start = Byu(image_queue = 4,group = 'register4',place = "Deajeon_univ",playtime = 1, resolution_index = 5) # find_group, image_queue, place, camera_playtime, resolution_index
     try:
         while True:
-            #byu_start.advertising(mode = 'day') #주간 혹은 밝은 곳에서 광고 디스플레이
-            byu_start.advertising(mode = 'night') #야간 혹은 주변이 어두운 곳에서 광고 디스플레이
+            byu_start.advertising(mode = 'day') #주간 혹은 밝은 곳에서 광고 디스플레이
+            #byu_start.advertising(mode = 'night') #야간 혹은 주변이 어두운 곳에서 광고 디스플레이
     except KeyboardInterrupt:
         print("KeyboardInterrupt!!")
         cv2.destroyAllWindows()
