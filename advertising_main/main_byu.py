@@ -6,7 +6,7 @@
 #    project     : Customized advertising transmission mobile robot using MicroSoft Face API
 #    Team        : By U(Capstone Design Project)
 #    Member      : Young-gi Kim, Geon-Hee Ryu, Eui-song Hwang, Byeong-Ho Lee
-#    Last Modify : 2019. 10. 18
+#    Last Modify : 2019. 10. 23
 #        
 # Ocams-1cgn-U & openCV
 import liboCams
@@ -51,7 +51,7 @@ class Byu:
 
         self.gender_age_data = [] # 데이터 셋 4개씩 담을 리스트
         self.data_count = 0 # 이미지 처리한 횟수(프로세스 동작한 횟수 카운트)
-        self.image_queue = image_queue # 처리할 이미지 갯수 약 4개 당 약 1분
+        self.image_queue = image_queue # 처리할 이미지 큐
         
         self.start_check = False # 데이터가 없는 경우, 디폴트 광고를 송출
         self.adv_check = False
@@ -297,7 +297,7 @@ class Byu:
                 DB_data = { 'customer': customer_data }
                 people += 1
             
-            self.writeDB(DB_data)
+            self.writeDB(DB_data) # DB에 고객 데이터 저장
 
             if self.data_count < self.image_queue : ## 지금까지 처리한 데이터(이미지)가 4개 이하이면
                 self.gender_age_data.insert(0, gender_age) ## 맨 처음에 그대로 새로운 데이터 삽입(전체 데이터 셋에 추가)
