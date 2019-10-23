@@ -2,7 +2,7 @@
 
   작성자: youngi-gi kim, Byeong-ho Lee
 
-  최종 수정일: 2019.10.16
+  최종 수정일: 2019.10.23
   참고자료: https://github.com/lupusorina/nexus-robots : NEXUS_ROBOT demo-code 및 Library
            https://simsamo.tistory.com/13?category=700958 : filter
            http://docs.ros.org/api/geometry_msgs/html/msg/Transform.html
@@ -13,6 +13,7 @@
   내용:
         모바일 플렛폼 3-omni wheel 제어
         초음파 센서 5개 이용 회피 알고리즘
+        IR센서 이용 낙상 방지
         아두이노 전원 스위치, 모터 드라이버 릴레이 스위치
         ROS 연동해서 rostopic으로 로봇 translation x,translation y, rotation z 값 제어
 
@@ -57,20 +58,20 @@
 // 뒷 바퀴 1번
 #define BACK_PWM 13
 #define BACK_DIR 12
-#define BACK_ENCODER_A 2
-#define BACK_ENCODER_B 3
+//#define BACK_ENCODER_A 2
+//#define BACK_ENCODER_B 3
 
 // 왼쪽바퀴 2번
 #define LEFT_PWM 9
 #define LEFT_DIR 8
-#define LEFT_ENCODER_A 21
-#define LEFT_ENCODER_B 20
+//#define LEFT_ENCODER_A 21
+//#define LEFT_ENCODER_B 20
 
 // 오른쪽 바퀴 3번
 #define RIGHT_PWM 7
 #define RIGHT_DIR 6
-#define RIGTH_ENCODER_A 19
-#define RIGTH_ENCODER_B 18
+//#define RIGTH_ENCODER_A 19
+//#define RIGTH_ENCODER_B 18
 
 //모터드라이버 릴레이 핀
 #define MOTOR_DRIVER_RELAY 37
@@ -103,9 +104,9 @@ bool leftdir;
 bool rightdir;
 
 // Encoder Position
-float backencoderpos = 0; //현재 모터 회전수
-float leftencoderpos = 0;
-float rightencoderpos = 0;
+//float backencoderpos = 0; //현재 모터 회전수
+//float leftencoderpos = 0;
+//float rightencoderpos = 0;
 
 // 초음파 timer
 unsigned long cur_time ;
@@ -153,9 +154,9 @@ float side_decay_rate = 0.7; // 좌,우 이동 후 반대로 이동 시 속도 �
 
 int front_check = 0;
 
-float forward_speed_max = 150; // recommend 100
-float side_speed_max = 150;    // recommend 150
-float turn_speed_max = 1.0;    // recommend 0.5
+float forward_speed_max = 150; // recommand 100
+float side_speed_max = 150;    // recommand 150
+float turn_speed_max = 0.7;    // recommand 0.5
 
 int front_delay = 100;
 int uturn_delay = 2000; //ms
@@ -196,8 +197,8 @@ void Collision_Avoidance() {
   if (IR_sensor_check == true)
   {
     drive_line_body_frame(0, 0, 0, 100);
-    drive_line_body_frame(-motor_forward_speed, 0, 0, 2000); //속도감소
-    drive_line_body_frame(0, 0, motor_turnR_speed, turn_delay * 6);
+    drive_line_body_frame(-motor_forward_speed, 0, 0, 2000); //후진
+    drive_line_body_frame(0, 0, motor_turnR_speed, turn_delay * 6); // U턴
   }
   else
   {
@@ -206,14 +207,14 @@ void Collision_Avoidance() {
       if (distance_F <= front_detection_distance2) {  // 정면이 막혔을 때
         drive_line_body_frame(0, 0, 0, front_delay); //정지
         front_check += 1;
-        if (front_check >= 30) { // front_check +1 -> +1s
+        if (front_check >= 30) { // front_check +10 -> +1s
           drive_line_body_frame(0, 0, motor_turnR_speed, turn_delay * 6);
           front_check = 0;
         }
         Avoidance_Check();
       }
     }
-    else { // 전방에 장애물 감지 안되었을 때정면이 안 막혔을 때
+    else { // 전방에 장애물 감지 안되었을 때,정면이 안 막혔을 때
       Avoidance_Check();
     }
   }
@@ -316,22 +317,6 @@ unsigned long UltraSonic(char TRIG, char ECHO) {
   return distance;
 }
 
-void ShowDistance() {
-  Serial.print("distance_F:");
-  Serial.println(distance_F);
-
-  Serial.print("distance_L:");
-  Serial.println(distance_L);
-
-  Serial.print("distance_R:");
-  Serial.println(distance_R);
-
-  Serial.print("distance_side_L:");
-  Serial.println(distance_side_L);
-
-  Serial.print("distance_side_R:");
-  Serial.println(distance_side_R);
-}
 
 //// Motor Pin Setup ///////////////
 void SetupMotorPin() {
@@ -346,60 +331,6 @@ void SetupMotorPin() {
   pinMode(MOTOR_DRIVER_RELAY, OUTPUT);
   digitalWrite(MOTOR_DRIVER_RELAY, LOW);
 }
-
-////////// Encoder Interrupt //////
-void SetInterruptPin() {
-  //motor 1 interrupt
-  pinMode(BACK_ENCODER_A, INPUT_PULLUP);
-  attachInterrupt(0, BackEncoderA, CHANGE);
-
-  pinMode(BACK_ENCODER_B, INPUT_PULLUP);
-  attachInterrupt(1, BackEncoderB, CHANGE);
-
-  //motor 2 interrupt
-  pinMode(LEFT_ENCODER_A, INPUT_PULLUP);
-  attachInterrupt(2, LeftEncoderA, CHANGE);
-
-  pinMode(LEFT_ENCODER_B, INPUT_PULLUP);
-  attachInterrupt(3, LeftEncoderB, CHANGE);
-
-  //motor3 interrupt
-  pinMode(RIGTH_ENCODER_A, INPUT_PULLUP);
-  attachInterrupt(4, RightEncoderA, CHANGE);
-
-  pinMode(RIGTH_ENCODER_B, INPUT_PULLUP);
-  attachInterrupt(5, RightEncoderB, CHANGE);
-}
-
-// 엔코더 값 읽는 인터럽트 함수
-void BackEncoderA() {
-  backencoderpos += (digitalRead(BACK_ENCODER_A) == digitalRead(BACK_ENCODER_B)) ? 1 : -1;
-}
-void BackEncoderB() {
-  backencoderpos += (digitalRead(BACK_ENCODER_A) == digitalRead(BACK_ENCODER_B)) ? -1 : 1;
-}
-void LeftEncoderA() {
-  leftencoderpos += (digitalRead(LEFT_ENCODER_A) == digitalRead(LEFT_ENCODER_B)) ? 1 : -1;
-}
-void LeftEncoderB() {
-  leftencoderpos += (digitalRead(LEFT_ENCODER_A) == digitalRead(LEFT_ENCODER_B)) ? -1 : 1;
-}
-void RightEncoderA() {
-  rightencoderpos += (digitalRead(RIGTH_ENCODER_A) == digitalRead(RIGTH_ENCODER_B)) ? 1 : -1;
-}
-void RightEncoderB() {
-  rightencoderpos += (digitalRead(RIGTH_ENCODER_A) == digitalRead(RIGTH_ENCODER_B)) ? -1 : 1;
-}
-
-void ShowEncoderAll() {
-  Serial.print("backencoderpos : ");
-  Serial.println(backencoderpos);
-  Serial.print("leftencoderpos : ");
-  Serial.println(leftencoderpos);
-  Serial.print("rightencoderpos : ");
-  Serial.println(rightencoderpos);
-}
-
 //// Motor Speed 계산부
 void generate_matrix_wheel_body(float matrix_w_b[][3], float matrix_b_w[][3]) {
   float angle_between_wheels[3];
@@ -520,7 +451,7 @@ void setup() {
 
   //Serial.begin(BAUDRATE1);
 
-  SetInterruptPin(); //인터럽트 핀 설정
+  //SetInterruptPin(); //인터럽트 핀 설정
   SetupMotorPin();  // Motor Pin 설정
   SetupUltraPin();  // Ultra Pin 설정
   pinMode(IR_SENSOR, INPUT);
@@ -534,11 +465,11 @@ void setup() {
 
   generate_matrix_wheel_body(matrix_w_b, matrix_b_w);
 
-  drive_line_body_frame(0, 0, 0, 0);  // 정상주행 앞으로
+  drive_line_body_frame(0, 0, 0, 0);
 }
 
-unsigned long s_time = 0; // 루프 타임체크용
-unsigned long e_time = 0; // 루프 타임체크용
+//unsigned long s_time = 0; // 루프 타임체크용
+//unsigned long e_time = 0; // 루프 타임체크용
 
 //////////////////////////////////////////////////////
 ////////  Loop //////////////////////////////
@@ -546,15 +477,6 @@ unsigned long e_time = 0; // 루프 타임체크용
 void loop() {
 
   nh.spinOnce();
-
-  /*cur_time = millis();
-
-    if (cur_time - pre_time >= mtime) // 50ms 마다 초음파 측정
-    {
-      Read_distance(); // 초음파 센서 값 읽는 부분
-
-      pre_time = cur_time ;
-    }*/
 
   if ( start_robot == true)
   {
@@ -577,3 +499,75 @@ void loop() {
     }
   }
 }
+
+/*
+  void ShowDistance() {
+  Serial.print("distance_F:");
+  Serial.println(distance_F);
+
+  Serial.print("distance_L:");
+  Serial.println(distance_L);
+
+  Serial.print("distance_R:");
+  Serial.println(distance_R);
+
+  Serial.print("distance_side_L:");
+  Serial.println(distance_side_L);
+
+  Serial.print("distance_side_R:");
+  Serial.println(distance_side_R);
+}
+
+////////// Encoder Interrupt //////
+void SetInterruptPin() {
+  //motor 1 interrupt
+  pinMode(BACK_ENCODER_A, INPUT_PULLUP);
+  attachInterrupt(0, BackEncoderA, CHANGE);
+
+  pinMode(BACK_ENCODER_B, INPUT_PULLUP);
+  attachInterrupt(1, BackEncoderB, CHANGE);
+
+  //motor 2 interrupt
+  pinMode(LEFT_ENCODER_A, INPUT_PULLUP);
+  attachInterrupt(2, LeftEncoderA, CHANGE);
+
+  pinMode(LEFT_ENCODER_B, INPUT_PULLUP);
+  attachInterrupt(3, LeftEncoderB, CHANGE);
+
+  //motor3 interrupt
+  pinMode(RIGTH_ENCODER_A, INPUT_PULLUP);
+  attachInterrupt(4, RightEncoderA, CHANGE);
+
+  pinMode(RIGTH_ENCODER_B, INPUT_PULLUP);
+  attachInterrupt(5, RightEncoderB, CHANGE);
+}
+
+// 엔코더 값 읽는 인터럽트 함수
+void BackEncoderA() {
+  backencoderpos += (digitalRead(BACK_ENCODER_A) == digitalRead(BACK_ENCODER_B)) ? 1 : -1;
+}
+void BackEncoderB() {
+  backencoderpos += (digitalRead(BACK_ENCODER_A) == digitalRead(BACK_ENCODER_B)) ? -1 : 1;
+}
+void LeftEncoderA() {
+  leftencoderpos += (digitalRead(LEFT_ENCODER_A) == digitalRead(LEFT_ENCODER_B)) ? 1 : -1;
+}
+void LeftEncoderB() {
+  leftencoderpos += (digitalRead(LEFT_ENCODER_A) == digitalRead(LEFT_ENCODER_B)) ? -1 : 1;
+}
+void RightEncoderA() {
+  rightencoderpos += (digitalRead(RIGTH_ENCODER_A) == digitalRead(RIGTH_ENCODER_B)) ? 1 : -1;
+}
+void RightEncoderB() {
+  rightencoderpos += (digitalRead(RIGTH_ENCODER_A) == digitalRead(RIGTH_ENCODER_B)) ? -1 : 1;
+}
+
+void ShowEncoderAll() {
+  Serial.print("backencoderpos : ");
+  Serial.println(backencoderpos);
+  Serial.print("leftencoderpos : ");
+  Serial.println(leftencoderpos);
+  Serial.print("rightencoderpos : ");
+  Serial.println(rightencoderpos);
+}
+*/
