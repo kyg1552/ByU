@@ -270,7 +270,7 @@ void SetupUltraPin() {
   pinMode(ECHO_side_decay_rateR, INPUT);
 }
 
-long Read_distance() {
+void Read_distance() {
   // 이전 측정 값에 비중을 두고, 현재 측정된 값엔 비중을 낮춤.
   IR_sensor_check = digitalRead(IR_SENSOR);
 
