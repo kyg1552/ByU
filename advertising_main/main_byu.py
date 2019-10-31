@@ -6,7 +6,7 @@
 #    project     : Customized advertising transmission mobile robot using MicroSoft Face API
 #    Team        : By U(Capstone Design Project)
 #    Member      : Young-gi Kim, Geon-Hee Ryu, Eui-song Hwang, Byeong-Ho Lee
-#    Last Modify : 2019. 10. 23
+#    Last Modify : 2019. 10. 31
 #        
 # Ocams-1cgn-U & openCV
 import liboCams
@@ -62,7 +62,8 @@ class Byu:
         self.costomer_face_img = " " # 카메라로부터 찍은 원본 이미지
         self.processing_img = " " # 히스토그램 평활화를 한 이미지 -> 너무 밝거나 너무 어두운 이미지는 얼굴 인식이 안되서 평활화 처리를 함.
 
-        self.video_file = '/home/byu/byU_main/adv/female30_QR.mp4' # default 광고
+        #self.video_file = '/home/byu/byU_main/adv/female30_QR.mp4' # default 광고
+        self.video_file = '/home/byu/byU_main/adv/test.avi' # 지역사회 공모전용 default 광고
 
     ##### 이미지에서 얼굴을 찾아서 bounding box 시작 ####
     # Convert width height to a point in a rectangle
@@ -114,25 +115,25 @@ class Byu:
             
             fnt = ImageFont .  truetype ( 'Pillow/Tests/fonts/FreeMono.ttf' , 15 ) #' ' , (font size)
             
-            count = 0
+            count = -1
             for f in identified_faces:
+                count += 1
                 if f['candidates']:
                     self.Accuracy = f['candidates'].pop().get('confidence')
                     if self.Accuracy >= 0.65:
                         print "Find Person!!"
                         print self.Accuracy
+                        c = 'Accuracy:' + str(self.Accuracy) #변수에 리스트에 있는 매칭 정보를 하나씩 저장 
+                        draw.rectangle(self.getRectangle(faces[count]), outline='red') #사각형을 그리는함수
+                        lines = textwrap.wrap(c, width=20) #줄바꿈을 위한 함수 넒이 20포인트 c는 매칭정보 
+                        y_text = self.getRectangleFont3(faces[count]) #디텍팅된 얼굴크기에서 왼쪽 아래 좌표를 저장하는 변수
+                        for line in lines: #lines 에 저장된 문자열의 수만큼 반복
+                            draw.text((self.getRectangleFont2(faces[count]),y_text), line, font=fnt, fill=(100,100,255,255))#텍스트를 그리는 함수
+                    
+                        img.show()
+
                         break
-                count += 1
-
-            c = 'Accuracy:' + str(self.Accuracy) #변수에 리스트에 있는 매칭 정보를 하나씩 저장 
-            draw.rectangle(self.getRectangle(faces[count]), outline='red') #사각형을 그리는함수
-            lines = textwrap.wrap(c, width=20) #줄바꿈을 위한 함수 넒이 20포인트 c는 매칭정보 
-            y_text = self.getRectangleFont3(faces[count]) #디텍팅된 얼굴크기에서 왼쪽 아래 좌표를 저장하는 변수
-            for line in lines: #lines 에 저장된 문자열의 수만큼 반복
-                draw.text((self.getRectangleFont2(faces[count]),y_text), line, font=fnt, fill=(100,100,255,255))#텍스트를 그리는 함수
                 
-            img.show()
-
     
     def faceBounding(self, img_url, faces):
         ####show Face BBox and numbering
@@ -272,7 +273,9 @@ class Byu:
         if not faces: # 얼굴 감지되지 않은 경우
             print("Can't Detected Face!! No get costomer Feature")
         else: #얼굴 감지된 경우
-            #self.faceBounding(img_url,faces)
+            
+            self.faceBounding(img_url,faces)
+            
             self.start_check = True
             data = {}
             gender_age = []
@@ -366,6 +369,7 @@ class Byu:
                 if self.male_max_index == 5:
                     print("male video 10~")
                     self.video_file = '/home/byu/byU_main/adv/male10_QR.mp4'
+                    self.video_file = '/home/byu/byU_main/adv/test.avi'
                 elif self.male_max_index == 4:
                     print("male video 20~")
                     self.video_file = '/home/byu/byU_main/adv/male20_QR.mp4'
@@ -408,6 +412,61 @@ class Byu:
                 clip = VideoFileClip(self.video_file)
                 clip.preview()
               ##### 얼굴에서 추출된 정보를 이용하여 광고 추출 및 송출 끝 ####
+    
+    def demo_display(self):
+        if self.start_check == False: # 고객 데이터가 없는 경우 디폴트 임의의 광고 송출
+            print("Not costomer data") 
+            print("Default advertisement")          
+            clip = VideoFileClip(self.video_file)
+            clip.preview()
+        else:
+            if self.adv_check:
+                print("male: %d~%d"%(self.male_max_index*10,self.male_max_index*10+9))
+                if self.male_max_index == 5:
+                    print("male video 10~")
+                    self.video_file = '/home/byu/byU_main/adv/test.avi'
+                elif self.male_max_index == 4:
+                    print("male video 20~")
+                    self.video_file = '/home/byu/byU_main/adv/test.avi'
+                elif self.male_max_index == 3:
+                    print("male video 30~")
+                    self.video_file = '/home/byu/byU_main/adv/test.avi'
+                elif self.male_max_index == 2:
+                    print("male video 40~")
+                    self.video_file = '/home/byu/byU_main/adv/test.avi'
+                elif self.male_max_index == 1:
+                    print("male video 50~")
+                    self.video_file = '/home/byu/byU_main/adv/test.avi'
+                elif self.male_max_index == 0:
+                    print("male video 60~")
+                    self.video_file = '/home/byu/byU_main/adv/test.avi'
+                    
+                clip = VideoFileClip(self.video_file)
+                clip.preview()
+            else:
+                print("female: %d~%d"%(self.female_max_index*10,self.female_max_index*10+9))
+                if self.female_max_index == 5:
+                    print("female video 10~")
+                    self.video_file = '/home/byu/byU_main/adv/test.avi'
+                elif self.female_max_index == 4:
+                    print("female video 20~")
+                    self.video_file = '/home/byu/byU_main/adv/test.avi'
+                elif self.female_max_index == 3:
+                    print("female video 30~")
+                    self.video_file = '/home/byu/byU_main/adv/test.avi'
+                elif self.female_max_index == 2:
+                    print("female video 40~")
+                    self.video_file = '/home/byu/byU_main/adv/test.avi'
+                elif self.female_max_index == 1:
+                    print("female video 50~")
+                    self.video_file = '/home/byu/byU_main/adv/test.avi'
+                elif self.female_max_index == 0:
+                    print("female video 60~")
+                    self.video_file = '/home/byu/byU_main/adv/test.avi'
+            
+                clip = VideoFileClip(self.video_file)
+                clip.preview()
+              ##### 얼굴에서 추출된 정보를 이용하여 광고 추출 및 송출 끝 ####
     def advertising(self,mode):
         if mode == 'day':
             self.getImageOcamS()
@@ -416,6 +475,7 @@ class Byu:
             if self.capture_result == True: # 카메라가 정상적으로 동작한 경우         
                 self.getFeature(self.costomer_face_img)
                 #self.printDB(self.readDB()) # DB에 저장된 데이터 출력
+                self.demo_display() # 지역사회 공모전용 광고 디스플레이 
                 #self.display()
                         
             else: # 카메라가 정상적으로 동작 안한 경우
@@ -429,6 +489,7 @@ class Byu:
             if self.capture_result == True: # 카메라가 정상적으로 동작한 경우         
                 self.getFeature(self.processing_img)
                 #self.printDB(self.readDB()) # DB에 저장된 데이터 출력
+                self.demo_display()
                 #self.display()
                         
             else: # 카메라가 정상적으로 동작 안한 경우
