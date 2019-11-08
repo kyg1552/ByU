@@ -6,7 +6,7 @@
 #    project     : Customized advertising transmission mobile robot using MicroSoft Face API
 #    Team        : By U(Capstone Design Project)
 #    Member      : Young-gi Kim, Geon-Hee Ryu, Eui-song Hwang, Byeong-Ho Lee
-#    Last Modify : 2019. 10. 31
+#    Last Modify : 2019. 11. 08
 #        
 # Ocams-1cgn-U & openCV
 import liboCams
@@ -29,10 +29,10 @@ from pymongo import MongoClient
 from moviepy.editor import *  
 
 #face api key 받아서 사용하는 부분
-KEY = 'e98d8be90e124f06a7824e9a643aea1a' #11월 10일까지
+KEY = 'bdac449abb36444cb6bc5a53867a0fd0' #12월 7일까지
 CF.Key.set(KEY)
 
-BASE_URL = 'https://bora123.cognitiveservices.azure.com/face/v1.0'
+BASE_URL = 'https://byu2.cognitiveservices.azure.com/face/v1.0'
 CF.BaseUrl.set(BASE_URL)
 
 class Byu:
@@ -62,10 +62,31 @@ class Byu:
         self.costomer_face_img = " " # 카메라로부터 찍은 원본 이미지
         self.processing_img = " " # 히스토그램 평활화를 한 이미지 -> 너무 밝거나 너무 어두운 이미지는 얼굴 인식이 안되서 평활화 처리를 함.
 
-        #self.video_file = '/home/byu/byU_main/adv/female30_QR.mp4' # default 광고
-        self.video_file = '/home/byu/byU_main/adv/test.avi' # 지역사회 공모전용 default 광고
+        self.video_file = '/home/byu/byU_main/adv/male50_QR.mp4' # default 광고
 
-    ##### 이미지에서 얼굴을 찾아서 bounding box 시작 ####
+    def img_histequalize(self, original_img, precessing_img):
+        img = cv2.imread(original_img)
+        
+        img_yuv = cv2.cvtColor(img, cv2.COLOR_BGR2YUV)
+
+        img_yuv[:,:,0] = cv2.equalizeHist(img_yuv[:,:,0])
+
+        img_output = cv2.cvtColor(img_yuv, cv2.COLOR_YUV2BGR)
+
+        cv2.imwrite(precessing_img, img_output) # 좌측 이미지 저장
+
+    def writeDB(self, db_data):
+        self.collection.insert_one(db_data) # 고객 데이터 DB 저장
+    
+    def readDB(self):
+        print("show all DB Data")       
+        results = self.collection.find()
+        return results
+
+    def printDB(self, results):
+        for result in results:
+            print(result)
+
     # Convert width height to a point in a rectangle
     def getRectangle(self,faceDictionary):
         rect = faceDictionary['faceRectangle']
@@ -92,48 +113,6 @@ class Byu:
         top = rect['top']
         right = top + rect['width'] 
         return (right)
-
-    def findperson(self, group, img_url):
-        PERSON_GROUP_ID = group
-        response = CF.face.detect(img_url)
-
-        face_ids = [d['faceId'] for d in response]
-        if not face_ids:
-            print "Can't Find People! Not Detect Face."
-        else:
-            identified_faces = CF.face.identify(face_ids, PERSON_GROUP_ID)
-            print identified_faces
-
-            # compared image
-            faces = CF.face.detect(img_url,True,False,'age,gender')
-
-            # Download the image from the url
-            img = Image.open(img_url)
-
-            # For each face returned use the face rectangle and draw a white box.
-            draw = ImageDraw.Draw(img)
-            
-            fnt = ImageFont .  truetype ( 'Pillow/Tests/fonts/FreeMono.ttf' , 15 ) #' ' , (font size)
-            
-            count = -1
-            for f in identified_faces:
-                count += 1
-                if f['candidates']:
-                    self.Accuracy = f['candidates'].pop().get('confidence')
-                    if self.Accuracy >= 0.65:
-                        print "Find Person!!"
-                        print self.Accuracy
-                        c = 'Accuracy:' + str(self.Accuracy) #변수에 리스트에 있는 매칭 정보를 하나씩 저장 
-                        draw.rectangle(self.getRectangle(faces[count]), outline='red') #사각형을 그리는함수
-                        lines = textwrap.wrap(c, width=20) #줄바꿈을 위한 함수 넒이 20포인트 c는 매칭정보 
-                        y_text = self.getRectangleFont3(faces[count]) #디텍팅된 얼굴크기에서 왼쪽 아래 좌표를 저장하는 변수
-                        for line in lines: #lines 에 저장된 문자열의 수만큼 반복
-                            draw.text((self.getRectangleFont2(faces[count]),y_text), line, font=fnt, fill=(100,100,255,255))#텍스트를 그리는 함수
-                    
-                        img.show()
-
-                        break
-                
     
     def faceBounding(self, img_url, faces):
         ####show Face BBox and numbering
@@ -151,56 +130,11 @@ class Byu:
 
         # Display the image in the users default image browser.
         img.show()
-        #img.close()
-        ##### 이미지에서 얼굴을 찾아서 bounding box 끝 ####
 
-    
-    def writeDB(self, db_data):
-        self.collection.insert_one(db_data) # 고객 데이터 DB 저장
-    
-    def readDB(self):
-        print("show all DB Data")       
-        results = self.collection.find()
-        return results
-
-    def printDB(self, results):
-        for result in results:
-            print(result)
-    
-    def getImage(self, mode = 'day'): # 웹캠 버전
-        self.cur_time = time.strftime('%Y%m%d_%H%M%S') # 현재 연/월/일 시간:분:초
-        self.costomer_face_img = '/home/byu/byU_main/advertising_main/costomer_image/' + self.cur_time + '_' + self.cur_place + '.jpg' #이미지를 시간, 장소로 저장
-        self.processing_img = '/home/byu/byU_main/advertising_main/processing_image/' + self.cur_time + '_' + self.cur_place + '_p.jpg' #히스토그램 평활화한 이미지 저장 파일명
-        cap = cv2.VideoCapture(1) # using USB camera
-
-        self.capture_result = False
-
-        if cap.isOpened(): # 사람들 사진촬영하는 부분
-            while True:
-                ret, frame = cap.read()
-                
-                if ret:
-                    self.capture_result = True
-                    cv2.imwrite(self.costomer_face_img, frame)
-                    if mode == 'night':
-                        self.img_histequalize(self.costomer_face_img, self.processing_img) # 히스토그램 평활화한 이미지 저장
-                    break
-                else:
-                    self.capture_result = False
-                    print('No Frame!')
-                    break
-        else:
-            self.capture_result = False
-            print('No Read Camera!')
-
-        cap.release()
-        cv2.destroyAllWindows()
-        
-    
     def getImageOcamS(self, mode = 'day'): # ocam으로 이미지 받기
         self.cur_time = time.strftime('%Y%m%d_%H%M%S') # 현재 연/월/일 시간:분:초
-        self.costomer_face_img = '/home/byu/byU_main/advertising_main/costomer_image/' + self.cur_time + '_' + self.cur_place + '.jpg' #이미지를 시간, 장소로 저장
-        self.processing_img = '/home/byu/byU_main/advertising_main/processing_image/' + self.cur_time + '_' + self.cur_place + '_p.jpg' #히스토그램 평활화한 이미지 저장 파일명
+        self.costomer_face_img = '/home/byu/byU_main/advertising_main/costomer_image/20191108' + self.cur_time + '_' + self.cur_place + '.jpg' #이미지를 시간, 장소로 저장
+        self.processing_img = '/home/byu/byU_main/advertising_main/processing_image/20191108' + self.cur_time + '_' + self.cur_place + '_p.jpg' #히스토그램 평활화한 이미지 저장 파일명
         # 오캠 구동을 위한 준비 과정
         devpath = liboCams.FindCamera('oCam')
         if devpath is None:
@@ -255,16 +189,46 @@ class Byu:
         test.Close()
         ##### 카메라로부터 이미지 받기 끝 ####
     
-    def img_histequalize(self, original_img, precessing_img):
-        img = cv2.imread(original_img)
-        
-        img_yuv = cv2.cvtColor(img, cv2.COLOR_BGR2YUV)
+    def findperson(self, group, img_url):
+        PERSON_GROUP_ID = group
+        response = CF.face.detect(img_url)
 
-        img_yuv[:,:,0] = cv2.equalizeHist(img_yuv[:,:,0])
+        face_ids = [d['faceId'] for d in response]
+        if not face_ids:
+            print "Can't Find People! Not Detect Face."
+        else:
+            identified_faces = CF.face.identify(face_ids, PERSON_GROUP_ID)
+            print identified_faces
 
-        img_output = cv2.cvtColor(img_yuv, cv2.COLOR_YUV2BGR)
+            # compared image
+            faces = CF.face.detect(img_url,True,False,'age,gender')
 
-        cv2.imwrite(precessing_img, img_output) # 좌측 이미지 저장
+            # Download the image from the url
+            img = Image.open(img_url)
+
+            # For each face returned use the face rectangle and draw a white box.
+            draw = ImageDraw.Draw(img)
+            
+            fnt = ImageFont .  truetype ( 'Pillow/Tests/fonts/FreeMono.ttf' , 15 ) #' ' , (font size)
+            
+            count = -1
+            for f in identified_faces:
+                count += 1
+                if f['candidates']:
+                    self.Accuracy = f['candidates'].pop().get('confidence')
+                    if self.Accuracy >= 0.65:
+                        print "Find Person!!"
+                        print self.Accuracy
+                        c = 'Accuracy:' + str(self.Accuracy) #변수에 리스트에 있는 매칭 정보를 하나씩 저장 
+                        draw.rectangle(self.getRectangle(faces[count]), outline='red') #사각형을 그리는함수
+                        lines = textwrap.wrap(c, width=20) #줄바꿈을 위한 함수 넒이 20포인트 c는 매칭정보 
+                        y_text = self.getRectangleFont3(faces[count]) #디텍팅된 얼굴크기에서 왼쪽 아래 좌표를 저장하는 변수
+                        for line in lines: #lines 에 저장된 문자열의 수만큼 반복
+                            draw.text((self.getRectangleFont2(faces[count]),y_text), line, font=fnt, fill=(100,100,255,255))#텍스트를 그리는 함수
+                    
+                        img.show()
+
+                        break
     
     def getFeature(self, img_url):
         ##### 이미지에서 얼굴을 찾아서 얼굴에서 특징(나이, 성별)추출 시작 ####
@@ -339,23 +303,20 @@ class Byu:
             self.male_max_index = male.argmax()
             self.female_max_index = female.argmax()
             self.adv_check = male[self.male_max_index] > female[self.female_max_index]
-                
-            print("Now Detected People gender,age:")
-            print(gender_age)
-            print("Now Detected people: %d" %(people))
-            print(str(self.image_queue) + " image male and female data")
-            print("male 10~19: %d"%(male[5]))
-            print("male 20~29: %d"%(male[4]))
-            print("male 30~39: %d"%(male[3]))
-            print("male 40~49: %d"%(male[2]))
-            print("male 50~59: %d"%(male[1]))
-            print("male 60~69: %d"%(male[0]))
-            print("female 10~19: %d"%(female[5]))
-            print("female 20~29: %d"%(female[4]))
-            print("female 30~39: %d"%(female[3]))
-            print("female 40~49: %d"%(female[2]))
-            print("female 50~59: %d"%(female[1]))
-            print("female 60~69: %d"%(female[0]))
+
+            print("인식된 총 얼굴 수: %d" %(people))
+            print("10대 남성: %d"%(male[5]))
+            print("20대 남성: %d"%(male[4]))
+            print("30대 남성: %d"%(male[3]))
+            print("40대 남성: %d"%(male[2]))
+            print("50대 남성: %d"%(male[1]))
+            print("60대 남성: %d"%(male[0]))
+            print("10대 여성: %d"%(female[5]))
+            print("20대 여성: %d"%(female[4]))
+            print("30대 여성: %d"%(female[3]))
+            print("40대 여성: %d"%(female[2]))
+            print("50대 여성: %d"%(female[1]))
+            print("60대 여성: %d"%(female[0]))
 
     def display(self):
         if self.start_check == False: # 고객 데이터가 없는 경우 디폴트 임의의 광고 송출
@@ -365,108 +326,50 @@ class Byu:
             clip.preview()
         else:
             if self.adv_check:
-                print("male: %d~%d"%(self.male_max_index*10,self.male_max_index*10+9))
                 if self.male_max_index == 5:
-                    print("male video 10~")
+                    print("10대 남성 광고 송출")
                     self.video_file = '/home/byu/byU_main/adv/male10_QR.mp4'
-                    self.video_file = '/home/byu/byU_main/adv/test.avi'
                 elif self.male_max_index == 4:
-                    print("male video 20~")
+                    print("20대 남성 광고 송출")
                     self.video_file = '/home/byu/byU_main/adv/male20_QR.mp4'
                 elif self.male_max_index == 3:
-                    print("male video 30~")
+                    print("30대 남성 광고 송출")
                     self.video_file = '/home/byu/byU_main/adv/male30_QR.mp4'
                 elif self.male_max_index == 2:
-                    print("male video 40~")
+                    print("40대 남성 광고 송출")
                     self.video_file = '/home/byu/byU_main/adv/male40_QR.mp4'
                 elif self.male_max_index == 1:
-                    print("male video 50~")
+                    print("50대 남성 광고 송출")
                     self.video_file = '/home/byu/byU_main/adv/male50_QR.mp4'
                 elif self.male_max_index == 0:
-                    print("male video 60~")
+                    print("60대 남성 광고 송출")
                     self.video_file = '/home/byu/byU_main/adv/male60_QR.mp4'
                     
                 clip = VideoFileClip(self.video_file)
                 clip.preview()
             else:
-                print("female: %d~%d"%(self.female_max_index*10,self.female_max_index*10+9))
                 if self.female_max_index == 5:
-                    print("female video 10~")
+                    print("10대 여성 광고 송출")
                     self.video_file = '/home/byu/byU_main/adv/female10_QR.mp4'
                 elif self.female_max_index == 4:
-                    print("female video 20~")
+                    print("20대 여성 광고 송출")
                     self.video_file = '/home/byu/byU_main/adv/female20_QR.mp4'
                 elif self.female_max_index == 3:
-                    print("female video 30~")
+                    print("30대 여성 광고 송출")
                     self.video_file = '/home/byu/byU_main/adv/female30_QR.mp4'
                 elif self.female_max_index == 2:
-                    print("female video 40~")
+                    print("40대 여성 광고 송출")
                     self.video_file = '/home/byu/byU_main/adv/female40_QR.mp4'
                 elif self.female_max_index == 1:
-                    print("female video 50~")
+                    print("50대 여성 광고 송출")
                     self.video_file = '/home/byu/byU_main/adv/female50_QR.mp4'
                 elif self.female_max_index == 0:
-                    print("female video 60~")
+                    print("60대 여성 광고 송출")
                     self.video_file = '/home/byu/byU_main/adv/female60_QR.mp4'
             
                 clip = VideoFileClip(self.video_file)
                 clip.preview()
-              ##### 얼굴에서 추출된 정보를 이용하여 광고 추출 및 송출 끝 ####
-    
-    def demo_display(self):
-        if self.start_check == False: # 고객 데이터가 없는 경우 디폴트 임의의 광고 송출
-            print("Not costomer data") 
-            print("Default advertisement")          
-            clip = VideoFileClip(self.video_file)
-            clip.preview()
-        else:
-            if self.adv_check:
-                print("male: %d~%d"%(self.male_max_index*10,self.male_max_index*10+9))
-                if self.male_max_index == 5:
-                    print("male video 10~")
-                    self.video_file = '/home/byu/byU_main/adv/test.avi'
-                elif self.male_max_index == 4:
-                    print("male video 20~")
-                    self.video_file = '/home/byu/byU_main/adv/test.avi'
-                elif self.male_max_index == 3:
-                    print("male video 30~")
-                    self.video_file = '/home/byu/byU_main/adv/test.avi'
-                elif self.male_max_index == 2:
-                    print("male video 40~")
-                    self.video_file = '/home/byu/byU_main/adv/test.avi'
-                elif self.male_max_index == 1:
-                    print("male video 50~")
-                    self.video_file = '/home/byu/byU_main/adv/test.avi'
-                elif self.male_max_index == 0:
-                    print("male video 60~")
-                    self.video_file = '/home/byu/byU_main/adv/test.avi'
-                    
-                clip = VideoFileClip(self.video_file)
-                clip.preview()
-            else:
-                print("female: %d~%d"%(self.female_max_index*10,self.female_max_index*10+9))
-                if self.female_max_index == 5:
-                    print("female video 10~")
-                    self.video_file = '/home/byu/byU_main/adv/test.avi'
-                elif self.female_max_index == 4:
-                    print("female video 20~")
-                    self.video_file = '/home/byu/byU_main/adv/test.avi'
-                elif self.female_max_index == 3:
-                    print("female video 30~")
-                    self.video_file = '/home/byu/byU_main/adv/test.avi'
-                elif self.female_max_index == 2:
-                    print("female video 40~")
-                    self.video_file = '/home/byu/byU_main/adv/test.avi'
-                elif self.female_max_index == 1:
-                    print("female video 50~")
-                    self.video_file = '/home/byu/byU_main/adv/test.avi'
-                elif self.female_max_index == 0:
-                    print("female video 60~")
-                    self.video_file = '/home/byu/byU_main/adv/test.avi'
-            
-                clip = VideoFileClip(self.video_file)
-                clip.preview()
-              ##### 얼굴에서 추출된 정보를 이용하여 광고 추출 및 송출 끝 ####
+              
     def advertising(self,mode):
         if mode == 'day':
             self.getImageOcamS()
@@ -474,9 +377,7 @@ class Byu:
 
             if self.capture_result == True: # 카메라가 정상적으로 동작한 경우         
                 self.getFeature(self.costomer_face_img)
-                #self.printDB(self.readDB()) # DB에 저장된 데이터 출력
-                self.demo_display() # 지역사회 공모전용 광고 디스플레이 
-                #self.display()
+                self.display()
                         
             else: # 카메라가 정상적으로 동작 안한 경우
                 print("error: No Face!! or No Camera!!")
@@ -488,20 +389,19 @@ class Byu:
 
             if self.capture_result == True: # 카메라가 정상적으로 동작한 경우         
                 self.getFeature(self.processing_img)
-                #self.printDB(self.readDB()) # DB에 저장된 데이터 출력
-                self.demo_display()
-                #self.display()
+                self.display()
                         
             else: # 카메라가 정상적으로 동작 안한 경우
                 print("error: No Face!! or No Camera!!")
                 print("Please Check camera")    
 
 if __name__ == '__main__':
-    byu_start = Byu(image_queue = 4,group = 'register4',place = "Deajeon_univ",playtime = 1, resolution_index = 5) # find_group, image_queue, place, camera_playtime, resolution_index
+    byu_start = Byu(image_queue = 4,group = 'register1',place = "Deajeon_univ",playtime = 1, resolution_index = 5) # find_group, image_queue, place, camera_playtime, resolution_index
     try:
         while True:
             byu_start.advertising(mode = 'day') #주간 혹은 밝은 곳에서 광고 디스플레이
             #byu_start.advertising(mode = 'night') #야간 혹은 주변이 어두운 곳에서 광고 디스플레이
+            #byu_start.printDB(byu_start.readDB()) # DB에 저장된 데이터 출력
     except KeyboardInterrupt:
         print("KeyboardInterrupt!!")
         cv2.destroyAllWindows()
