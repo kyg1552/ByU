@@ -217,9 +217,12 @@ class Byu:
                 if f['candidates']:
                     self.Accuracy = f['candidates'].pop().get('confidence')
                     if self.Accuracy >= 0.65:
-                        print "Find Person!!"
-                        print self.Accuracy
-                        c = 'Accuracy:' + str(self.Accuracy) #변수에 리스트에 있는 매칭 정보를 하나씩 저장 
+                        print "찾는 인물입니다!"
+                        print("일치율: %f"%self.Accuracy)
+                        print ''
+                        """
+                        #화면에 찾는 인물 바운딩박스와 일치율 표시
+                        c = "Accuracy:" + str(self.Accuracy) #변수에 리스트에 있는 매칭 정보를 하나씩 저장 
                         draw.rectangle(self.getRectangle(faces[count]), outline='red') #사각형을 그리는함수
                         lines = textwrap.wrap(c, width=20) #줄바꿈을 위한 함수 넒이 20포인트 c는 매칭정보 
                         y_text = self.getRectangleFont3(faces[count]) #디텍팅된 얼굴크기에서 왼쪽 아래 좌표를 저장하는 변수
@@ -227,7 +230,7 @@ class Byu:
                             draw.text((self.getRectangleFont2(faces[count]),y_text), line, font=fnt, fill=(100,100,255,255))#텍스트를 그리는 함수
                     
                         img.show()
-
+                        """
                         break
     
     def getFeature(self, img_url):
@@ -238,7 +241,7 @@ class Byu:
             print("Can't Detected Face!! No get costomer Feature")
         else: #얼굴 감지된 경우
             
-            self.faceBounding(img_url,faces)
+            #self.faceBounding(img_url,faces)
             
             self.start_check = True
             data = {}
@@ -303,20 +306,24 @@ class Byu:
             self.male_max_index = male.argmax()
             self.female_max_index = female.argmax()
             self.adv_check = male[self.male_max_index] > female[self.female_max_index]
-
+            
             print("인식된 총 얼굴 수: %d" %(people))
+            print("인식된 사람들의 성별,나이 정보")
+            print(gender_age)
             print("10대 남성: %d"%(male[5]))
             print("20대 남성: %d"%(male[4]))
             print("30대 남성: %d"%(male[3]))
             print("40대 남성: %d"%(male[2]))
             print("50대 남성: %d"%(male[1]))
-            print("60대 남성: %d"%(male[0]))
+            print("60대 남성: %d"%(male[0])) 
+            print('')
             print("10대 여성: %d"%(female[5]))
             print("20대 여성: %d"%(female[4]))
             print("30대 여성: %d"%(female[3]))
             print("40대 여성: %d"%(female[2]))
             print("50대 여성: %d"%(female[1]))
             print("60대 여성: %d"%(female[0]))
+            print('')
 
     def display(self):
         if self.start_check == False: # 고객 데이터가 없는 경우 디폴트 임의의 광고 송출
@@ -396,10 +403,10 @@ class Byu:
                 print("Please Check camera")    
 
 if __name__ == '__main__':
-    byu_start = Byu(image_queue = 4,group = 'register1',place = "Deajeon_univ",playtime = 1, resolution_index = 5) # find_group, image_queue, place, camera_playtime, resolution_index
+    byu_start = Byu(image_queue = 4,group = 'register2',place = "Deajeon_univ",playtime = 1, resolution_index = 5) # find_group, image_queue, place, camera_playtime, resolution_index
     try:
         while True:
-            byu_start.advertising(mode = 'day') #주간 혹은 밝은 곳에서 광고 디스플레이
+            byu_start.advertising(mode = 'night') #주간 혹은 밝은 곳에서 광고 디스플레이
             #byu_start.advertising(mode = 'night') #야간 혹은 주변이 어두운 곳에서 광고 디스플레이
             #byu_start.printDB(byu_start.readDB()) # DB에 저장된 데이터 출력
     except KeyboardInterrupt:
