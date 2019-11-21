@@ -29,10 +29,10 @@ from pymongo import MongoClient
 from moviepy.editor import *  
 
 #face api key 받아서 사용하는 부분
-KEY = 'bdac449abb36444cb6bc5a53867a0fd0' #12월 7일까지
+KEY = '3c3f1c62adbc43efb78f46ecc09b3f94' #12월 20일까지
 CF.Key.set(KEY)
 
-BASE_URL = 'https://byu2.cognitiveservices.azure.com/face/v1.0'
+BASE_URL = 'https://borabora.cognitiveservices.azure.com/face/v1.0'
 CF.BaseUrl.set(BASE_URL)
 
 class Byu:
@@ -398,7 +398,7 @@ class Byu:
     def advertising(self,mode):
         if mode == 'day':
             self.getImageOcamS()
-            self.findperson(self.group, self.costomer_face_img) # 찾고자 하는 사람 찾기
+            #self.findperson(self.group, self.costomer_face_img) # 찾고자 하는 사람 찾기
 
             if self.capture_result == True: # 카메라가 정상적으로 동작한 경우         
                 self.getFeature(self.costomer_face_img)
@@ -410,7 +410,7 @@ class Byu:
 
         elif mode == 'night':
             self.getImageOcamS(mode = 'night')
-            self.findperson(self.group, self.processing_img) # 찾고자 하는 사람 찾기
+            #self.findperson(self.group, self.processing_img) # 찾고자 하는 사람 찾기
             
             #self.capture_result = True
             #self.processing_img = './image1.JPG'
@@ -424,7 +424,7 @@ class Byu:
                 print("Please Check camera")    
 
 if __name__ == '__main__':
-    byu_start = Byu(image_queue = 4,group = 'register3',place = "서울상공회의소",playtime = 1, resolution_index = 5) # find_group, image_queue, place, camera_playtime, resolution_index
+    byu_start = Byu(image_queue = 4,group = 'register1',place = "서울상공회의소",playtime = 1, resolution_index = 5) # find_group, image_queue, place, camera_playtime, resolution_index
     #byu_start.advertising(mode = 'night') #주간 혹은 밝은 곳에서 광고 디스플레이
     #byu_start.printDB(byu_start.readDB())
     #byu_start.advertising(mode = 'day')
