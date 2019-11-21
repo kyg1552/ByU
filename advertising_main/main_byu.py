@@ -6,7 +6,7 @@
 #    project     : Customized advertising transmission mobile robot using MicroSoft Face API
 #    Team        : By U(Capstone Design Project)
 #    Member      : Young-gi Kim, Geon-Hee Ryu, Eui-song Hwang, Byeong-Ho Lee
-#    Last Modify : 2019. 11. 08
+#    Last Modify : 2019. 11. 15
 #        
 # Ocams-1cgn-U & openCV
 import liboCams
@@ -63,6 +63,13 @@ class Byu:
         self.processing_img = " " # 히스토그램 평활화를 한 이미지 -> 너무 밝거나 너무 어두운 이미지는 얼굴 인식이 안되서 평활화 처리를 함.
 
         self.video_file = '/home/byu/byU_main/adv/male50_QR.mp4' # default 광고
+
+        self.data = {}
+        self.gender_age = []
+        self.people = 0
+        self.customer_data = []
+        self.male = np.zeros(6) #남성 연령대 인원 수  10~19, 20~29, 30~39, 40~49, 50~59, 60~69
+        self.female = np.zeros(6) #여성 연령대 인원 수 10~19, 20~29, 30~39, 40~49, 50~59, 60~69
 
     def img_histequalize(self, original_img, precessing_img):
         img = cv2.imread(original_img)
@@ -133,8 +140,8 @@ class Byu:
 
     def getImageOcamS(self, mode = 'day'): # ocam으로 이미지 받기
         self.cur_time = time.strftime('%Y%m%d_%H%M%S') # 현재 연/월/일 시간:분:초
-        self.costomer_face_img = '/home/byu/byU_main/advertising_main/costomer_image/20191108' + self.cur_time + '_' + self.cur_place + '.jpg' #이미지를 시간, 장소로 저장
-        self.processing_img = '/home/byu/byU_main/advertising_main/processing_image/20191108' + self.cur_time + '_' + self.cur_place + '_p.jpg' #히스토그램 평활화한 이미지 저장 파일명
+        self.costomer_face_img = '/home/byu/byU_main/advertising_main/costomer_image/' + self.cur_time + '_' + self.cur_place + '.jpg' #이미지를 시간, 장소로 저장
+        self.processing_img = '/home/byu/byU_main/advertising_main/processing_image/' + self.cur_time + '_' + self.cur_place + '_p.jpg' #히스토그램 평활화한 이미지 저장 파일명
         # 오캠 구동을 위한 준비 과정
         devpath = liboCams.FindCamera('oCam')
         if devpath is None:
@@ -183,6 +190,8 @@ class Byu:
             frame_cnt += 1
 
         print 'Result Frame Per Second:', frame_cnt/(time.time()-start_time) #camera 구동 시간
+        print('------------------------------------------------------')
+        print('')
 
         test.Stop()  
         cv2.destroyAllWindows()
@@ -217,10 +226,12 @@ class Byu:
                 if f['candidates']:
                     self.Accuracy = f['candidates'].pop().get('confidence')
                     if self.Accuracy >= 0.65:
-                        print "찾는 인물입니다!"
+                        print('------------------------------------------------------')
+                        print('')
+                        print "****등록된 인물 있음*****"
                         print("일치율: %f"%self.Accuracy)
                         print ''
-                        """
+                        
                         #화면에 찾는 인물 바운딩박스와 일치율 표시
                         c = "Accuracy:" + str(self.Accuracy) #변수에 리스트에 있는 매칭 정보를 하나씩 저장 
                         draw.rectangle(self.getRectangle(faces[count]), outline='red') #사각형을 그리는함수
@@ -230,7 +241,7 @@ class Byu:
                             draw.text((self.getRectangleFont2(faces[count]),y_text), line, font=fnt, fill=(100,100,255,255))#텍스트를 그리는 함수
                     
                         img.show()
-                        """
+                        
                         break
     
     def getFeature(self, img_url):
@@ -240,90 +251,97 @@ class Byu:
         if not faces: # 얼굴 감지되지 않은 경우
             print("Can't Detected Face!! No get costomer Feature")
         else: #얼굴 감지된 경우
-            
+            self.start_check = True
+
             #self.faceBounding(img_url,faces)
             
-            self.start_check = True
-            data = {}
-            gender_age = []
-            people = 0
-            customer_data = []
-            male = np.zeros(6) #남성 연령대 인원 수  10~19, 20~29, 30~39, 40~49, 50~59, 60~69
-            female = np.zeros(6) #여성 연령대 인원 수 10~19, 20~29, 30~39, 40~49, 50~59, 60~69
+            self.data = {}
+            
+            self.people = 0
+            self.customer_data = []
+            self.male = np.zeros(6) #남성 연령대 인원 수  10~19, 20~29, 30~39, 40~49, 50~59, 60~69
+            self.female = np.zeros(6) #여성 연령대 인원 수 10~19, 20~29, 30~39, 40~49, 50~59, 60~69
        
             for face in faces:
                 add = []
-                data = face['faceAttributes']
+                self.data = face['faceAttributes']
         
-                add.append(data['gender'])
-                add.append(data['age'])
-                gender_age.append(add)
+                add.append(self.data['gender'])
+                add.append(self.data['age'])
+                self.gender_age.append(add)
                 
-                customer_data.append(data['gender'])
-                customer_data.append(str(data['age']))
-                customer_data.append(self.cur_time)
-                customer_data.append(self.cur_place)
+                self.customer_data.append(self.data['gender'])
+                self.customer_data.append(str(self.data['age']))
+                self.customer_data.append(self.cur_time)
+                self.customer_data.append(self.cur_place)
 
-                DB_data = { 'customer': customer_data }
-                people += 1
+                DB_data = { 'customer': self.customer_data }
+                self.people += 1
             
             self.writeDB(DB_data) # DB에 고객 데이터 저장
 
             if self.data_count < self.image_queue : ## 지금까지 처리한 데이터(이미지)가 4개 이하이면
-                self.gender_age_data.insert(0, gender_age) ## 맨 처음에 그대로 새로운 데이터 삽입(전체 데이터 셋에 추가)
+                self.gender_age_data.insert(0, self.gender_age) ## 맨 처음에 그대로 새로운 데이터 삽입(전체 데이터 셋에 추가)
             else: ## 지금까지 처리한 데이터(이미지)가 4개 초과이면(5개부터)
                 del self.gender_age_data[self.image_queue-1] ## 맨 처음 들어온 데이터(마지막 인덱스) 삭제
-                self.gender_age_data.insert(0, gender_age) ## 맨 처음에 새로운 데이터 삽입
+                self.gender_age_data.insert(0, self.gender_age) ## 맨 처음에 새로운 데이터 삽입
             self.data_count +=1
 
-            for gender_age in self.gender_age_data:  # 최근 데이터 4개 불러옴.
-                for gender, age in gender_age:  # 남자,여자 각 연령대별 숫자 카운트
+            for self.gender_age in self.gender_age_data:  # 최근 데이터 4개 불러옴.
+                for gender, age in self.gender_age:  # 남자,여자 각 연령대별 숫자 카운트
                     if gender == 'male' and age >= 10 and age < 20:
-                        male[5] += 1
+                        self.male[5] += 1
                     elif gender == 'male' and age >= 20 and age < 30:
-                        male[4] += 1              
+                        self.male[4] += 1              
                     elif gender == 'male' and age >= 30 and age < 40:
-                        male[3] += 1                       
+                        self.male[3] += 1                       
                     elif gender == 'male' and age >= 40 and age < 50:
-                        male[2] += 1                       
+                        self.male[2] += 1                       
                     elif gender == 'male' and age >= 50 and age < 60:
-                        male[1] += 1                       
+                        self.male[1] += 1                       
                     elif gender == 'male' and age >= 60 and age < 70:
-                        male[0] += 1                       
+                        self.male[0] += 1                       
                     elif gender == 'female' and age >= 10 and age < 20:
-                        female[5] += 1                      
+                        self.female[5] += 1                      
                     elif gender == 'female' and age >= 20 and age < 30:
-                        female[4] += 1                       
+                        self.female[4] += 1                       
                     elif gender == 'female' and age >= 30 and age < 40:
-                        female[3] += 1                       
+                        self.female[3] += 1                       
                     elif gender == 'female' and age >= 40 and age < 50:
-                        female[2] += 1                      
+                        self.female[2] += 1                      
                     elif gender == 'female' and age >= 50 and age < 60:
-                        female[1] += 1                       
+                        self.female[1] += 1                       
                     elif gender == 'female' and age >= 60 and age < 70:
-                        female[0] += 1
+                        self.female[0] += 1
                            
-            self.male_max_index = male.argmax()
-            self.female_max_index = female.argmax()
-            self.adv_check = male[self.male_max_index] > female[self.female_max_index]
+            self.male_max_index = self.male.argmax()
+            self.female_max_index = self.female.argmax()
+            self.adv_check = self.male[self.male_max_index] > self.female[self.female_max_index]
             
-            print("인식된 총 얼굴 수: %d" %(people))
-            print("인식된 사람들의 성별,나이 정보")
-            print(gender_age)
-            print("10대 남성: %d"%(male[5]))
-            print("20대 남성: %d"%(male[4]))
-            print("30대 남성: %d"%(male[3]))
-            print("40대 남성: %d"%(male[2]))
-            print("50대 남성: %d"%(male[1]))
-            print("60대 남성: %d"%(male[0])) 
+            print('------------------------------------------------------')
+            print("최근 인식된 총 얼굴 수: %d" %(self.people))
+            print("최근 인식된 사람들의 성별,나이 정보")
+            print(self.gender_age)
+            del self.gender_age[:]
+
             print('')
-            print("10대 여성: %d"%(female[5]))
-            print("20대 여성: %d"%(female[4]))
-            print("30대 여성: %d"%(female[3]))
-            print("40대 여성: %d"%(female[2]))
-            print("50대 여성: %d"%(female[1]))
-            print("60대 여성: %d"%(female[0]))
+            print("현재 누적 데이터 처리 고객 수")
+            print("10대 남성: %d"%(self.male[5]))
+            print("20대 남성: %d"%(self.male[4]))
+            print("30대 남성: %d"%(self.male[3]))
+            print("40대 남성: %d"%(self.male[2]))
+            print("50대 남성: %d"%(self.male[1]))
+            print("60대 남성: %d"%(self.male[0]))
+            
             print('')
+            print("10대 여성: %d"%(self.female[5]))
+            print("20대 여성: %d"%(self.female[4]))
+            print("30대 여성: %d"%(self.female[3]))
+            print("40대 여성: %d"%(self.female[2]))
+            print("50대 여성: %d"%(self.female[1]))
+            print("60대 여성: %d"%(self.female[0]))
+            print('')
+            print('------------------------------------------------------')
 
     def display(self):
         if self.start_check == False: # 고객 데이터가 없는 경우 디폴트 임의의 광고 송출
@@ -390,9 +408,12 @@ class Byu:
                 print("error: No Face!! or No Camera!!")
                 print("Please Check camera")
 
-        elif mode == 'night':   
+        elif mode == 'night':
             self.getImageOcamS(mode = 'night')
             self.findperson(self.group, self.processing_img) # 찾고자 하는 사람 찾기
+            
+            #self.capture_result = True
+            #self.processing_img = './image1.JPG'
 
             if self.capture_result == True: # 카메라가 정상적으로 동작한 경우         
                 self.getFeature(self.processing_img)
@@ -403,11 +424,15 @@ class Byu:
                 print("Please Check camera")    
 
 if __name__ == '__main__':
-    byu_start = Byu(image_queue = 4,group = 'register2',place = "Deajeon_univ",playtime = 1, resolution_index = 5) # find_group, image_queue, place, camera_playtime, resolution_index
+    byu_start = Byu(image_queue = 4,group = 'register3',place = "서울상공회의소",playtime = 1, resolution_index = 5) # find_group, image_queue, place, camera_playtime, resolution_index
+    #byu_start.advertising(mode = 'night') #주간 혹은 밝은 곳에서 광고 디스플레이
+    #byu_start.printDB(byu_start.readDB())
+    #byu_start.advertising(mode = 'day')
+    
     try:
         while True:
-            byu_start.advertising(mode = 'night') #주간 혹은 밝은 곳에서 광고 디스플레이
-            #byu_start.advertising(mode = 'night') #야간 혹은 주변이 어두운 곳에서 광고 디스플레이
+            #byu_start.advertising(mode = 'day') #주간 혹은 밝은 곳에서 광고 디스플레이
+            byu_start.advertising(mode = 'night') #야간 혹은 주변이 어두운 곳에서 광고 디스플레이
             #byu_start.printDB(byu_start.readDB()) # DB에 저장된 데이터 출력
     except KeyboardInterrupt:
         print("KeyboardInterrupt!!")
