@@ -163,6 +163,8 @@ int uturn_delay = 2000; //ms
 int turn_delay = 700;
 int side_delay = 300;
 
+int front_stay_time = 20; //전방 정지 감지시간
+
 //// ros 선언 부////
 ros::NodeHandle nh;
 
@@ -207,7 +209,7 @@ void Collision_Avoidance() {
       if (distance_F <= front_detection_distance2) {  // 정면이 막혔을 때
         drive_line_body_frame(0, 0, 0, front_delay); //정지
         front_check += 1;
-        if (front_check >= 30) { // front_check +10 -> +1s
+        if (front_check >= front_stay_time) { // front_check +10 -> +1s
           drive_line_body_frame(0, 0, motor_turnR_speed, turn_delay * 6);
           front_check = 0;
         }
