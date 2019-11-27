@@ -229,9 +229,10 @@ class Byu:
                         print('------------------------------------------------------')
                         print('')
                         print "****등록된 인물 있음*****"
-                        print("일치율: %f"%self.Accuracy)
+                        print("일치율: %.1f"%(self.Accuracy*100)+"%")
                         print ''
                         
+                        """
                         #화면에 찾는 인물 바운딩박스와 일치율 표시
                         c = "Accuracy:" + str(self.Accuracy) #변수에 리스트에 있는 매칭 정보를 하나씩 저장 
                         draw.rectangle(self.getRectangle(faces[count]), outline='red') #사각형을 그리는함수
@@ -241,7 +242,7 @@ class Byu:
                             draw.text((self.getRectangleFont2(faces[count]),y_text), line, font=fnt, fill=(100,100,255,255))#텍스트를 그리는 함수
                     
                         img.show()
-                        
+                        """
                         break
     
     def getFeature(self, img_url):
@@ -398,7 +399,7 @@ class Byu:
     def advertising(self,mode):
         if mode == 'day':
             self.getImageOcamS()
-            #self.findperson(self.group, self.costomer_face_img) # 찾고자 하는 사람 찾기
+            self.findperson(self.group, self.costomer_face_img) # 찾고자 하는 사람 찾기
 
             if self.capture_result == True: # 카메라가 정상적으로 동작한 경우         
                 self.getFeature(self.costomer_face_img)
@@ -410,11 +411,8 @@ class Byu:
 
         elif mode == 'night':
             self.getImageOcamS(mode = 'night')
-            #self.findperson(self.group, self.processing_img) # 찾고자 하는 사람 찾기
+            self.findperson(self.group, self.processing_img) # 찾고자 하는 사람 찾기
             
-            #self.capture_result = True
-            #self.processing_img = './image1.JPG'
-
             if self.capture_result == True: # 카메라가 정상적으로 동작한 경우         
                 self.getFeature(self.processing_img)
                 self.display()
@@ -424,16 +422,15 @@ class Byu:
                 print("Please Check camera")    
 
 if __name__ == '__main__':
-    byu_start = Byu(image_queue = 4,group = 'register1',place = "서울상공회의소",playtime = 1, resolution_index = 5) # find_group, image_queue, place, camera_playtime, resolution_index
-    #byu_start.advertising(mode = 'night') #주간 혹은 밝은 곳에서 광고 디스플레이
-    #byu_start.printDB(byu_start.readDB())
-    #byu_start.advertising(mode = 'day')
     
+    byu_start = Byu(image_queue = 4,group = 'register1',place = "대전대학교",playtime = 1, resolution_index = 5) # find_group, image_queue, place, camera_playtime, resolution_index
+
     try:
         while True:
             #byu_start.advertising(mode = 'day') #주간 혹은 밝은 곳에서 광고 디스플레이
             byu_start.advertising(mode = 'night') #야간 혹은 주변이 어두운 곳에서 광고 디스플레이
             #byu_start.printDB(byu_start.readDB()) # DB에 저장된 데이터 출력
+    
     except KeyboardInterrupt:
         print("KeyboardInterrupt!!")
         cv2.destroyAllWindows()
