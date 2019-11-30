@@ -202,15 +202,16 @@ class Byu:
         test.Close()
         ##### 카메라로부터 이미지 받기 끝 ####
     
-    def findperson(self, group, img_url):
+    def findperson(self, group, img_url, vip_num):
         PERSON_GROUP_ID = group
         response = CF.face.detect(img_url)
         self.vip_check = 0
 
         face_ids = [d['faceId'] for d in response]
         if not face_ids:
-            print "Can't Find People! Not Detect Face."
-            return False
+            print ("Can't Find vip%d"%vip_num)
+            #print "Can't Find People! Not Detect Face."
+            #return False
         else:
             identified_faces = CF.face.identify(face_ids, PERSON_GROUP_ID)
             print identified_faces
@@ -252,7 +253,7 @@ class Byu:
         else: #얼굴 감지된 경우
             self.start_check = True
 
-            #self.faceBounding(img_url,faces)
+            self.faceBounding(img_url,faces)
             
             self.data = {}
             
@@ -411,15 +412,15 @@ class Byu:
             self.getImageOcamS(mode = 'night')
             
             if self.capture_result == True: # 카메라가 정상적으로 동작한 경우
-                self.findperson(self.vip1, self.processing_img) # vip1 찾기
+                self.findperson(self.vip1, self.processing_img, 1) # vip1 찾기
                 if self.vip_check == 1: # vip1이 있으면
                     print("find vip1")
                 else: #vip1이 없으면
-                    self.findperson(self.vip2, self.processing_img) #vip2 찾기
-                    if sefl.vip_check == 2: #vip2가 있으면
+                    self.findperson(self.vip2, self.processing_img, 2) #vip2 찾기
+                    if self.vip_check == 2: #vip2가 있으면
                         print("find vip2")
                     else: #vip2가 없으면
-                        self.findperson(self.vip3, self.processing_img) #vip3 찾기
+                        self.findperson(self.vip3, self.processing_img, 3) #vip3 찾기
                         if self.vip_check == 3: #vip3가 있으면
                             print("find vip3")
                         else: #vip3까지 없으면, 일반 고객들을 위한 광고
