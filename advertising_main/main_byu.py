@@ -399,9 +399,9 @@ class Byu:
     def advertising(self,mode):
         if mode == 'day':
             self.getImageOcamS()
-            self.findperson(self.group, self.costomer_face_img) # 찾고자 하는 사람 찾기
-
-            if self.capture_result == True: # 카메라가 정상적으로 동작한 경우         
+            
+            if self.capture_result == True: # 카메라가 정상적으로 동작한 경우   
+                self.findperson(self.group, self.costomer_face_img) # 찾고자 하는 사람 찾기      
                 self.getFeature(self.costomer_face_img)
                 self.display()
                         
@@ -411,9 +411,9 @@ class Byu:
 
         elif mode == 'night':
             self.getImageOcamS(mode = 'night')
-            self.findperson(self.group, self.processing_img) # 찾고자 하는 사람 찾기
             
-            if self.capture_result == True: # 카메라가 정상적으로 동작한 경우         
+            if self.capture_result == True: # 카메라가 정상적으로 동작한 경우   
+                self.findperson(self.group, self.processing_img) # 찾고자 하는 사람 찾기      
                 self.getFeature(self.processing_img)
                 self.display()
                         
