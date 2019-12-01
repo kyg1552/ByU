@@ -47,6 +47,9 @@ class Byu:
         self.vip1 = 'register1'
         self.vip2 = 'register2'
         self.vip3 = 'register3'
+        self.video_vip1 = '/home/byu/byU_main/adv/vip1_test.mp4'
+        self.video_vip2 = '/home/byu/byU_main/adv/vip2_test.mp4'
+        self.video_vip3 = '/home/byu/byU_main/adv/vip3_test.mp4'
         self.Accuracy = 0 # 찾고자하는 인물 정확도
 
         self.cur_time = time.strftime('%Y%m%d_%H%M%S') # 현재 연/월/일 시간:분:초
@@ -66,7 +69,7 @@ class Byu:
         self.costomer_face_img = " " # 카메라로부터 찍은 원본 이미지
         self.processing_img = " " # 히스토그램 평활화를 한 이미지 -> 너무 밝거나 너무 어두운 이미지는 얼굴 인식이 안되서 평활화 처리를 함.
 
-        self.video_file = '/home/byu/byU_main/adv/male50_QR.mp4' # default 광고
+        self.video_file = '/home/byu/byU_main/adv/female20_QR.mp4' # default 광고
 
         self.data = {}
         self.gender_age = []
@@ -209,12 +212,12 @@ class Byu:
 
         face_ids = [d['faceId'] for d in response]
         if not face_ids:
-            print ("Can't Find vip%d"%vip_num)
-            #print "Can't Find People! Not Detect Face."
+            #print ("Can't Find vip%d"%vip_num)
+            print "Can't Find People! Not Detect Face."
             #return False
         else:
             identified_faces = CF.face.identify(face_ids, PERSON_GROUP_ID)
-            print identified_faces
+            #print identified_faces
 
             # compared image
             faces = CF.face.detect(img_url,True,False,'age,gender')
@@ -253,7 +256,7 @@ class Byu:
         else: #얼굴 감지된 경우
             self.start_check = True
 
-            self.faceBounding(img_url,faces)
+            #self.faceBounding(img_url,faces)
             
             self.data = {}
             
@@ -415,14 +418,20 @@ class Byu:
                 self.findperson(self.vip1, self.processing_img, 1) # vip1 찾기
                 if self.vip_check == 1: # vip1이 있으면
                     print("find vip1")
+                    clip = VideoFileClip(self.video_vip1)
+                    clip.preview()
                 else: #vip1이 없으면
                     self.findperson(self.vip2, self.processing_img, 2) #vip2 찾기
                     if self.vip_check == 2: #vip2가 있으면
                         print("find vip2")
+                        clip = VideoFileClip(self.video_vip2)
+                        clip.preview()
                     else: #vip2가 없으면
                         self.findperson(self.vip3, self.processing_img, 3) #vip3 찾기
                         if self.vip_check == 3: #vip3가 있으면
                             print("find vip3")
+                            clip = VideoFileClip(self.video_vip3)
+                            clip.preview()
                         else: #vip3까지 없으면, 일반 고객들을 위한 광고
                             print("none vip")
                             self.getFeature(self.processing_img)
@@ -431,6 +440,20 @@ class Byu:
             else: # 카메라가 정상적으로 동작 안한 경우
                 print("error: No Face!! or No Camera!!")
                 print("Please Check camera")    
+        """ 
+        #일반 광고 송출 버전
+        elif mode == 'night':
+            self.getImageOcamS(mode = 'night')
+            
+            if self.capture_result == True: # 카메라가 정상적으로 동작한 경우
+                #self.findperson(self.vip1, self.processing_img) # 찾고자 하는 사람 찾기         
+                self.getFeature(self.processing_img)
+                self.display()
+                        
+            else: # 카메라가 정상적으로 동작 안한 경우
+                print("error: No Face!! or No Camera!!")
+                print("Please Check camera") 
+        """
 
 if __name__ == '__main__':
     
