@@ -43,13 +43,15 @@ class Byu:
         self.index = resolution_index
 
         #self.group = group # 찾고자 하는 인물을 등록한 그룹
+        # register1,4: KYG, register2,5: LBH, register3: RYU
+        #chume: ChuME, leejg: LeeJG, jangsk: jsk
         self.vip_check = 0
-        self.vip1 = 'register1'
-        self.vip2 = 'register2'
-        self.vip3 = 'register3'
-        self.video_vip1 = '/home/byu/byU_main/adv/vip1_test.mp4'
-        self.video_vip2 = '/home/byu/byU_main/adv/vip2_test.mp4'
-        self.video_vip3 = '/home/byu/byU_main/adv/vip3_test.mp4'
+        self.vip1 = 'chume'
+        self.vip2 = 'leejg'
+        self.vip3 = 'jangsk'
+        self.video_vip1 = '/home/byu/byU_main/adv/vip1.mp4'
+        self.video_vip2 = '/home/byu/byU_main/adv/vip2.mp4'
+        self.video_vip3 = '/home/byu/byU_main/adv/vip3.mp4'
         self.Accuracy = 0 # 찾고자하는 인물 정확도
 
         self.cur_time = time.strftime('%Y%m%d_%H%M%S') # 현재 연/월/일 시간:분:초
