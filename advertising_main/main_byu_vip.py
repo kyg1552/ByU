@@ -6,7 +6,7 @@
 #    project     : Customized advertising transmission mobile robot using MicroSoft Face API
 #    Team        : By U(Capstone Design Project)
 #    Member      : Young-gi Kim, Geon-Hee Ryu, Eui-song Hwang, Byeong-Ho Lee
-#    Last Modify : 2019. 11. 30, vip 3명 추가, 광고 따로
+#    Last Modify : 2019. 12. 02, vip 3명 추가, 광고 따로
 #        
 # Ocams-1cgn-U & openCV
 import liboCams
@@ -46,9 +46,14 @@ class Byu:
         # register1,4: KYG, register2,5: LBH, register3: RYU
         #chume: ChuME, leejg: LeeJG, jangsk: jsk
         self.vip_check = 0
-        self.vip1 = 'chume'
-        self.vip2 = 'leejg'
+        self.vip1 = 'register1'
+        self.vip2 = 'register2'
+        #self.vip1 = 'chume'
+        #self.vip2 = 'leejg'
         self.vip3 = 'jangsk'
+        self.vip1_ch = 0
+        self.vip2_ch = 0
+        self.vip3_ch = 0
         self.video_vip1 = '/home/byu/byU_main/adv/vip1.mp4'
         self.video_vip2 = '/home/byu/byU_main/adv/vip2.mp4'
         self.video_vip3 = '/home/byu/byU_main/adv/vip3.mp4'
@@ -237,7 +242,7 @@ class Byu:
                 count += 1
                 if f['candidates']:
                     self.Accuracy = f['candidates'].pop().get('confidence')
-                    if self.Accuracy >= 0.60:
+                    if self.Accuracy >= 0.55:
                         print('------------------------------------------------------')
                         print('')
                         print "****등록된 인물 있음*****"
@@ -258,7 +263,7 @@ class Byu:
         else: #얼굴 감지된 경우
             self.start_check = True
 
-            #self.faceBounding(img_url,faces)
+            self.faceBounding(img_url,faces)
             
             self.data = {}
             
@@ -418,24 +423,27 @@ class Byu:
             
             if self.capture_result == True: # 카메라가 정상적으로 동작한 경우
                 self.findperson(self.vip1, self.processing_img, 1) # vip1 찾기
-                if self.vip_check == 1: # vip1이 있으면
-                    print("find vip1")
+                if self.vip_check == 1 and self.vip1_ch == 0: # vip1이 있고, 광고 나온적 없으면
+                    #print("find vip1")
+                    self.vip1_ch = 1
                     clip = VideoFileClip(self.video_vip1)
                     clip.preview()
                 else: #vip1이 없으면
                     self.findperson(self.vip2, self.processing_img, 2) #vip2 찾기
-                    if self.vip_check == 2: #vip2가 있으면
-                        print("find vip2")
+                    if self.vip_check == 2 and self.vip2_ch == 0: #vip2가 있고, 광고 나온적 없으면
+                        #print("find vip2")
+                        self.vip2_ch = 1
                         clip = VideoFileClip(self.video_vip2)
                         clip.preview()
                     else: #vip2가 없으면
                         self.findperson(self.vip3, self.processing_img, 3) #vip3 찾기
-                        if self.vip_check == 3: #vip3가 있으면
-                            print("find vip3")
+                        if self.vip_check == 3 and self.vip3_ch == 0: #vip3가 있고, 광고 나온적 없으면
+                            #print("find vip3")
+                            self.vip3_ch = 1
                             clip = VideoFileClip(self.video_vip3)
                             clip.preview()
                         else: #vip3까지 없으면, 일반 고객들을 위한 광고
-                            print("none vip")
+                            #print("none vip")
                             self.getFeature(self.processing_img)
                             self.display()
          
@@ -459,7 +467,7 @@ class Byu:
 
 if __name__ == '__main__':
     
-    byu_start = Byu(image_queue = 4,place = "대전대학교",playtime = 1, resolution_index = 5) # find_group, image_queue, place, camera_playtime, resolution_index
+    byu_start = Byu(image_queue = 4,place = "세종대학교",playtime = 1, resolution_index = 5) # find_group, image_queue, place, camera_playtime, resolution_index
 
     try:
         while True:
