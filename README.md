@@ -18,6 +18,4 @@ Mentor: 김지영 멘토님(LG CNS)
 ![image](https://user-images.githubusercontent.com/47591345/61575357-8ec56c80-ab05-11e9-9171-4bb98a8593ec.png)
 
 ![image](https://user-images.githubusercontent.com/47591345/61575358-908f3000-ab05-11e9-9f82-68f0aa7aebd4.png)
-
-안녕!!
  
