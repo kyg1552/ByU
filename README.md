@@ -10,6 +10,9 @@ Member: 김영기(Leader), 황의송, 류건희, 이병호
 Professor: 유정기 교수님
 
 Mentor: 김지영 멘토님(LG CNS)
+
+한이음 제출 시연 동영상
+https://www.youtube.com/watch?v=uk9DwQ39DXI
 #
 
 # ROBOT Design
