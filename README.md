@@ -3,7 +3,7 @@
 
 대전대학교 캡스톤 디자인
 
-Project: Object Detection을 이용한 고객 맞춤형 광고 송출 모바일 로봇(Using Face Recognition, MS Azure Face API)
+Project: Object Detection을 이용한 고객 맞춤형 광고 송출 모바일 로봇(Use MS Azure Face Recognition API and ROS)
 
 Member: 김영기(Leader), 황의송, 류건희, 이병호
 
