@@ -22,7 +22,8 @@ https://www.youtube.com/watch?v=uk9DwQ39DXI
 
 ![image](https://user-images.githubusercontent.com/47591345/61575358-908f3000-ab05-11e9-9f82-68f0aa7aebd4.png)
  
-## 사용보드
+## 사용한 보드
+* Odroid H2
 * Arduino Mega2560
 
 * rosserial install for Arduino
