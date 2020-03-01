@@ -48,3 +48,13 @@ https://www.youtube.com/watch?v=uk9DwQ39DXI
       
          $roscore
          $rosrun rosserial_python serial_node.py _port:=/dev/ttyACM0
+         
+* robot control
+      
+      $rostopic pub -r 15 /byu_control geometry_msgs/Transform ‘[translation: [translation(x), 
+      translation(y), translation(z)], rotation: [rotation(x), rotation(y), rotation(z), w]’
+      
+      <Example>
+      $roscore
+      $rosrun rosserial_python serial_node.py _port:=/dev/ttyACM0
+      $rostopic pub -r 15 /byu_control geometry_msgs/Transform '{translation: [150, 150, 0], rotation: [0, 0, 0.5, 0]}'
