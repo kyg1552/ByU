@@ -26,6 +26,7 @@ https://www.youtube.com/watch?v=uk9DwQ39DXI
 * Odroid H2
 * Arduino Mega2560
 
+## Arduino에서 ROS를 사용하기 위한 라이브러리 설치
 * rosserial install for Arduino
    * http://wiki.ros.org/rosserial_arduino/Tutorials/Arduino%20IDE%20Setup
    * Arduino IDE Setup
@@ -49,7 +50,8 @@ https://www.youtube.com/watch?v=uk9DwQ39DXI
       
          $roscore
          $rosrun rosserial_python serial_node.py _port:=/dev/ttyACM0
-         
+
+## 로봇 제어  
 * robot control
       
       $rostopic pub -r 15 /byu_control geometry_msgs/Transform ‘[translation: [translation(x), 
