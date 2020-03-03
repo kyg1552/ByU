@@ -4,7 +4,7 @@
 
 Project: MS Azure Face Recognition API를 이용한 고객 맞춤형 광고 송출 로봇
 
-Member: 김영기(Leader), 황의송, 류건희, 이병호
+Member: 김영기, 황의송, 류건희, 이병호
 
 Professor: 유정기 교수님
 
