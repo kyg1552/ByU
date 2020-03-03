@@ -1,18 +1,13 @@
 # Team: ByU
-2019 ICT 멘토링, 한이음
 
-대전대학교 캡스톤 디자인
+대전대학교
 
-Project: Object Detection을 이용한 고객 맞춤형 광고 송출 모바일 로봇(Use MS Azure Face Recognition API and ROS)
+Project: MS Azure Face Recognition API를 이용한 고객 맞춤형 광고 송출 로봇
 
 Member: 김영기(Leader), 황의송, 류건희, 이병호
 
 Professor: 유정기 교수님
 
-Mentor: 김지영 멘토님(LG CNS)
-
-한이음 제출 시연 동영상
-https://www.youtube.com/watch?v=uk9DwQ39DXI
 #
 ## ROBOT H/W Architecture
 ![HW구성도](https://user-images.githubusercontent.com/37207332/75628129-6c5a0c80-5c19-11ea-8be5-8316deee991d.JPG)
