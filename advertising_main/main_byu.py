@@ -3,7 +3,7 @@
 
 #    Documentation
 #
-#    project     : Customized advertising transmission mobile robot using MicroSoft Face API
+#    project     : personalized advertising mobile robot using Microsoft Face recognition API
 #    Team        : By U(Capstone Design Project)
 #    Member      : Young-gi Kim, Geon-Hee Ryu, Eui-song Hwang, Byeong-Ho Lee
 #    Last Modify : 2019. 11. 15
@@ -28,11 +28,11 @@ from pymongo import MongoClient
 
 from moviepy.editor import *  
 
-#face api key 받아서 사용하는 부분
-KEY = '3c3f1c62adbc43efb78f46ecc09b3f94' #12월 20일까지
+#face api key
+KEY = 'MS Azure Face recognition service key'
 CF.Key.set(KEY)
 
-BASE_URL = 'https://borabora.cognitiveservices.azure.com/face/v1.0'
+BASE_URL = 'MS Azure Face recognition service Endpoint'
 CF.BaseUrl.set(BASE_URL)
 
 class Byu:
@@ -49,18 +49,18 @@ class Byu:
 
         self.collection = MongoClient("localhost", 27017).test.test
 
-        self.gender_age_data = [] # 데이터 셋 4개씩 담을 리스트
+        self.gender_age_data = [] # Face feature Queue
         self.data_count = 0 # 이미지 처리한 횟수(프로세스 동작한 횟수 카운트)
-        self.image_queue = image_queue # 처리할 이미지 큐
+        self.image_queue = image_queue # Queue size
         
         self.start_check = False # 데이터가 없는 경우, 디폴트 광고를 송출
         self.adv_check = False
-        self.capture_result = False # 카메라가 정상적으로 동작해서 촬영을 했는지 확인하는 변수
+        self.capture_result = False # 카메라 정상 동작 확인 변수
 
         self.male_max_index = 0
         self.female_max_index = 0
         self.costomer_face_img = " " # 카메라로부터 찍은 원본 이미지
-        self.processing_img = " " # 히스토그램 평활화를 한 이미지 -> 너무 밝거나 너무 어두운 이미지는 얼굴 인식이 안되서 평활화 처리를 함.
+        self.processing_img = " " # 히스토그램 평활화를 한 이미지
 
         self.video_file = '/home/byu/byU_main/adv/male50_QR.mp4' # default 광고
 
@@ -138,10 +138,10 @@ class Byu:
         # Display the image in the users default image browser.
         img.show()
 
-    def getImageOcamS(self, mode = 'day'): # ocam으로 이미지 받기
+    def getImageOcamS(self, mode = 'on'): # ocam으로 이미지 받기
         self.cur_time = time.strftime('%Y%m%d_%H%M%S') # 현재 연/월/일 시간:분:초
-        self.costomer_face_img = '/home/byu/byU_main/advertising_main/costomer_image/' + self.cur_time + '_' + self.cur_place + '.jpg' #이미지를 시간, 장소로 저장
-        self.processing_img = '/home/byu/byU_main/advertising_main/processing_image/' + self.cur_time + '_' + self.cur_place + '_p.jpg' #히스토그램 평활화한 이미지 저장 파일명
+        self.costomer_face_img = '/home/byu/byU_main/advertising_main/costomer_image/' + self.cur_time + '_' + self.cur_place + '.jpg' #이미지를 시간, 장소로 저장, original image
+        self.processing_img = '/home/byu/byU_main/advertising_main/processing_image/' + self.cur_time + '_' + self.cur_place + '_p.jpg' # filltering image
         # 오캠 구동을 위한 준비 과정
         devpath = liboCams.FindCamera('oCam')
         if devpath is None:
@@ -177,7 +177,7 @@ class Byu:
                 
                 left_ = cv2.cvtColor(left_, cv2.COLOR_BAYER_GB2BGR)
                 cv2.imwrite(self.costomer_face_img, left_) # 좌측 이미지 저장
-                if mode == 'night':
+                if mode == 'on':
                     self.img_histequalize(self.costomer_face_img, self.processing_img) # 히스토그램 평활화한 이미지 저장
             else: # oCamS-1CGN-U 카메라가 아닐 경우
                 print("Error Not oCamS-1CGN-U")
@@ -397,7 +397,7 @@ class Byu:
                 clip.preview()
               
     def advertising(self,mode):
-        if mode == 'day':
+        if mode == 'off':
             self.getImageOcamS()
             
             if self.capture_result == True: # 카메라가 정상적으로 동작한 경우   
@@ -408,9 +408,9 @@ class Byu:
             else: # 카메라가 정상적으로 동작 안한 경우
                 print("error: No Face!! or No Camera!!")
                 print("Please Check camera")
-
-        elif mode == 'night':
-            self.getImageOcamS(mode = 'night')
+                
+        elif mode == 'on':
+            self.getImageOcamS(mode = 'on')
             
             if self.capture_result == True: # 카메라가 정상적으로 동작한 경우   
                 self.findperson(self.group, self.processing_img) # 찾고자 하는 사람 찾기      
@@ -427,8 +427,8 @@ if __name__ == '__main__':
 
     try:
         while True:
-            #byu_start.advertising(mode = 'day') #주간 혹은 밝은 곳에서 광고 디스플레이
-            byu_start.advertising(mode = 'night') #야간 혹은 주변이 어두운 곳에서 광고 디스플레이
+            #byu_start.advertising(mode = 'off') # image filltering off
+            byu_start.advertising(mode = 'on') #image filltering on
             #byu_start.printDB(byu_start.readDB()) # DB에 저장된 데이터 출력
     
     except KeyboardInterrupt:
