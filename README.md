@@ -1,12 +1,12 @@
 # Team: ByU
 
-대전대학교
+Daejeon University
 
 Project: MS Azure Face Recognition API를 이용한 고객 맞춤형 광고 로봇
 
-Member: 김영기, 황의송, 류건희, 이병호
+Member: Young-Gi Kim, Geon-Hee Ryu, Eui-Song Hwang, Byeong-Ho Lee
 
-Professor: 유정기 교수님
+Professor: Jeong-Ki Yoo
 
 #
 ## ROBOT H/W Architecture
@@ -19,11 +19,11 @@ Professor: 유정기 교수님
 
 ![image](https://user-images.githubusercontent.com/47591345/61575358-908f3000-ab05-11e9-9f82-68f0aa7aebd4.png)
  
-## 사용한 보드
+## Used Embedded board
 * Odroid H2
 * Arduino Mega2560
 
-## Arduino에서 ROS를 사용하기 위한 라이브러리 설치
+## ROS Libarary install on Arduino
 * rosserial install for Arduino
    * http://wiki.ros.org/rosserial_arduino/Tutorials/Arduino%20IDE%20Setup
    * Arduino IDE Setup
