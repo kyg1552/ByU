@@ -2,10 +2,6 @@
 
 Project: Open-source robot platform providing personalized advertisements
 
-Member: Young-Gi Kim, Geon-Hee Ryu, Eui-Song Hwang, Byeong-Ho Lee
-
-Professor: Jeong-Ki Yoo
-
 #
 ## ROBOT H/W Architecture
 ![HW구성도](https://user-images.githubusercontent.com/37207332/75628129-6c5a0c80-5c19-11ea-8be5-8316deee991d.JPG)
