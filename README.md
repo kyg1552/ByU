@@ -1,8 +1,6 @@
 # Team: ByU
 
-Daejeon University
-
-Project: MS Azure Face Recognition API를 이용한 고객 맞춤형 광고 로봇
+Project: Open-source robot platform providing personalized advertisements
 
 Member: Young-Gi Kim, Geon-Hee Ryu, Eui-Song Hwang, Byeong-Ho Lee
 
