@@ -1,8 +1,8 @@
 /* Omni Motor Control ByU Robot
 
-  작성자: youngi-gi kim, Byeong-ho Lee
+  작성자: 
 
-  최종 수정일: 2019.10.23
+  최종 수정일:
   참고자료: https://github.com/lupusorina/nexus-robots : NEXUS_ROBOT demo-code 및 Library
            https://simsamo.tistory.com/13?category=700958 : filter
            http://docs.ros.org/api/geometry_msgs/html/msg/Transform.html
