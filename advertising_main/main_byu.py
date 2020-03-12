@@ -3,10 +3,10 @@
 
 #    Documentation
 #
-#    project     : personalized advertising mobile robot using Microsoft Face recognition API
-#    Team        : By U(Capstone Design Project)
-#    Member      : Young-gi Kim, Geon-Hee Ryu, Eui-song Hwang, Byeong-Ho Lee
-#    Last Modify : 2019. 11. 15
+#    project     : open-source robot platform providing personalized advertisements
+#    Team        : By U
+#    Member      : 
+#    Last Modify : 
 #        
 # Ocams-1cgn-U & openCV
 import liboCams
