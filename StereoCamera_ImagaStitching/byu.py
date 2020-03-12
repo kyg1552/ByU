@@ -5,9 +5,9 @@
 
 #    Documentation
 #
-#    project     : Customized advertising transmission mobile robot using MicroSoft Face API
-#    Team        : By U(Capstone Design Project)
-#    Member      : Young-gi Kim, Geon-Hee Ryu, Eui-song Hwang, Byeong-Ho Lee
+#    project     : open-source robot platform providing personalized advertisements
+#    Team        : By U
+#    Member      : 
 #    Date        : 2019. 08.23 
 #    Modified    : 
 #    Description :
