@@ -42,7 +42,7 @@ Project: Open-source robot platform providing personalized advertisements
          $roscore
          $rosrun rosserial_python serial_node.py _port:=/dev/ttyACM0
 
-## How to Robot control
+## How to control Robot 
 
 1. byu_robot_mode_add.ino file upload on Arduino Mega
 
