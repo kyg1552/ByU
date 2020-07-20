@@ -48,7 +48,7 @@ Project: Open-source robot platform providing personalized advertisements
 
 2. connect Arduino Mega and odroid H2(Master) to rosserial
    
-      * rosrun rosserial_python serial_node.py _port:=/dev/serial_port_file(=ttyACM#,#:serial_port_number)
+       $rosrun rosserial_python serial_node.py _port:=/dev/serial_port_file(=ttyACM#,#:serial_port_number)
 
 3. robot control ros command
 
