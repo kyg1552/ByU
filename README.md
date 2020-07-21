@@ -1,6 +1,7 @@
 # Team: ByU
 
 Project: Open-source robot platform providing personalized advertisements
+Paper: https://github.com/ADRobot2019/ADRobot2019
 
 #
 ## ROBOT H/W Architecture
