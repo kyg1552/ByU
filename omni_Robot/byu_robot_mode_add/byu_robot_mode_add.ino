@@ -5,7 +5,7 @@
   최종 수정일:
   참고자료: https://github.com/lupusorina/nexus-robots : NEXUS_ROBOT demo-code 및 Library
            https://simsamo.tistory.com/13?category=700958 : filter
-           http://docs.ros.org/api/geometry_msgs/html/msg/Transform.html
+           http://docs.ros.org/en/melodic/api/geometry_msgs/html/msg/Twist.html
            - Ultrasound Sensosr
             https://fleshandmachines.wordpress.com/2011/09/16/arduino-double-sonar-with-ros/ - 초음파센서 2개 이상 사용 시
             http://docs.ros.org/melodic/api/sensor_msgs/html/msg/Range.html  - 초음파 센서 값 ros type
@@ -25,7 +25,7 @@
 #include <MatrixMath.h>
 #include <math.h>
 #include <ros.h>
-#include <geometry_msgs/Transform.h>
+#include <geometry_msgs/Twist.h>
 
 //Baudrate
 #define BAUDRATE1 9600
@@ -168,25 +168,25 @@ int front_stay_time = 20; //전방 정지 감지시간
 //// ros 선언 부////
 ros::NodeHandle nh;
 
-void Byu_Cb(const geometry_msgs::Transform& byu_val) // 명령 값 받아서 byu robot 제어
+void Byu_Cb(const geometry_msgs::Twist& byu_val) // 명령 값 받아서 byu robot 제어
 {
-  motor_forward_speed = byu_val.translation.x;
+  motor_forward_speed = byu_val.Twist.x;
   if (motor_forward_speed > forward_speed_max) motor_forward_speed = forward_speed_max;
   motor_forward_speed = -motor_forward_speed;
 
-  motor_moveTosideR_speed = byu_val.translation.y;
+  motor_moveTosideR_speed = byu_val.Twist.y;
   if (motor_moveTosideR_speed > side_speed_max) motor_moveTosideR_speed = side_speed_max;
   motor_moveTosideL_speed = -motor_moveTosideR_speed;
 
-  motor_turnR_speed = byu_val.rotation.z;
+  motor_turnR_speed = byu_val.Twist.z;
   if (motor_turnR_speed > turn_speed_max) motor_turnR_speed = turn_speed_max;
   motor_turnL_speed = -motor_turnR_speed;
 
   start_robot = true;
-  robot_mode = (int)byu_val.translation.z;
+  robot_mode = AVOIDANCE_MODE;
 }
 
-ros::Subscriber<geometry_msgs::Transform> sub("/byu_control", Byu_Cb); //제어값받음
+ros::Subscriber<geometry_msgs::Twist> sub("/byu_control", Byu_Cb); //제어값받음
 
 //////////////////////////////////////
 
