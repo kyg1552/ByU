@@ -21,6 +21,10 @@
   추가할 내용:
 */
 
+/* 
+ *  Omni Motor Control ByU Robot
+ */
+
 #define _NAMIKI_MOTOR
 #include <MatrixMath.h>
 #include <math.h>
@@ -58,20 +62,14 @@
 // 뒷 바퀴 1번
 #define BACK_PWM 13
 #define BACK_DIR 12
-//#define BACK_ENCODER_A 2
-//#define BACK_ENCODER_B 3
 
 // 왼쪽바퀴 2번
 #define LEFT_PWM 9
 #define LEFT_DIR 8
-//#define LEFT_ENCODER_A 21
-//#define LEFT_ENCODER_B 20
 
 // 오른쪽 바퀴 3번
 #define RIGHT_PWM 7
 #define RIGHT_DIR 6
-//#define RIGTH_ENCODER_A 19
-//#define RIGTH_ENCODER_B 18
 
 //모터드라이버 릴레이 핀
 #define MOTOR_DRIVER_RELAY 37
@@ -102,11 +100,6 @@ int i, j;
 bool backdir;
 bool leftdir;
 bool rightdir;
-
-// Encoder Position
-//float backencoderpos = 0; //현재 모터 회전수
-//float leftencoderpos = 0;
-//float rightencoderpos = 0;
 
 // 초음파 timer
 unsigned long cur_time ;
@@ -142,7 +135,6 @@ unsigned long  distance_side_L;
 unsigned long  distance_side_R;
 
 bool start_robot = false;
-int robot_mode = -1;
 float motor_forward_speed = 0.0; // 전진 속도 -: (x)
 float motor_turnR_speed = 0.0; // +: 우측(z)
 float motor_turnL_speed = 0.0; // -:좌측 회전속도(z)
@@ -154,9 +146,9 @@ float side_decay_rate = 0.7; // 좌,우 이동 후 반대로 이동 시 속도 �
 
 int front_check = 0;
 
-float forward_speed_max = 150; // recommand 100
-float side_speed_max = 150;    // recommand 150
-float turn_speed_max = 0.7;    // recommand 0.5
+float forward_speed_max = 1.0;
+float side_speed_max = 1.0;    
+float turn_speed_max = 0.7;    
 
 int front_delay = 100;
 int uturn_delay = 2000; //ms
@@ -183,7 +175,6 @@ void Byu_Cb(const geometry_msgs::Twist& byu_val) // 명령 값 받아서 byu rob
   motor_turnL_speed = -motor_turnR_speed;
 
   start_robot = true;
-  robot_mode = AVOIDANCE_MODE;
 }
 
 ros::Subscriber<geometry_msgs::Twist> sub("/byu_control", Byu_Cb); //제어값받음
@@ -273,7 +264,6 @@ void SetupUltraPin() {
 }
 
 void Read_distance() {
-  // 이전 측정 값에 비중을 두고, 현재 측정된 값엔 비중을 낮춤.
   IR_sensor_check = digitalRead(IR_SENSOR);
 
   distance_F = UltraSonic(TRIG_Front, ECHO_Front);
@@ -420,40 +410,9 @@ void RightrunPWM(unsigned int PWM, bool dir) {
   analogWrite(RIGHT_PWM, PWM);
 }
 
-void Advoidance_Mode() {
-
-  cur_time = millis();
-  if (cur_time - pre_time >= mtime) // 50ms 마다 초음파 측정
-  {
-    Read_distance(); // 초음파 센서 값 읽는 부분
-    Collision_Avoidance(); // 충돌회피 알고리즘으로 모바일 로봇 구동
-    pre_time = cur_time ;
-  }
-
-}
-void Forward_Mode() {
-  drive_line_body_frame(motor_forward_speed, 0, 0, 0);
-}
-void Circle_Mode() {
-  drive_line_body_frame(motor_forward_speed, motor_moveTosideR_speed, motor_turnR_speed, 0);
-}
-void Rectangle_Mode() {
-  drive_line_body_frame(motor_forward_speed, 0, 0, 3000);
-  drive_line_body_frame(0, motor_moveTosideR_speed, 0, 3000);
-  drive_line_body_frame(-motor_forward_speed, 0, 0, 3000);
-  drive_line_body_frame(0, -motor_moveTosideR_speed, 0, 3000);
-}
-void Command_Mode() {
-  drive_line_body_frame(motor_forward_speed, motor_moveTosideR_speed, motor_turnR_speed, 0);
-}
-
-
 ////// Setup ////////////////
 void setup() {
 
-  //Serial.begin(BAUDRATE1);
-
-  //SetInterruptPin(); //인터럽트 핀 설정
   SetupMotorPin();  // Motor Pin 설정
   SetupUltraPin();  // Ultra Pin 설정
   pinMode(IR_SENSOR, INPUT);
@@ -482,94 +441,15 @@ void loop() {
 
   if ( start_robot == true)
   {
-    switch (robot_mode) {
-      case AVOIDANCE_MODE:
-        Advoidance_Mode();
-        break;
-      case FORWARD_MODE:
-        Forward_Mode();
-        break;
-      case CIRCLE_MODE:
-        Circle_Mode();
-        break;
-      case RECT_MDOE:
-        Rectangle_Mode();
-        break;
-      case COMMAND_MODE:
-        Command_Mode();
-        break;
+    cur_time = millis();
+
+    if (cur_time - pre_time >= mtime)
+    {
+      Read_distance(); // 초음파 센서 값 읽는 부분
+      Collision_Avoidance(); // 충돌회피 알고리즘으로 모바일 로봇 구동   
+      
+      pre_time = cur_time ;
     }
   }
+
 }
-
-/*
-  void ShowDistance() {
-  Serial.print("distance_F:");
-  Serial.println(distance_F);
-
-  Serial.print("distance_L:");
-  Serial.println(distance_L);
-
-  Serial.print("distance_R:");
-  Serial.println(distance_R);
-
-  Serial.print("distance_side_L:");
-  Serial.println(distance_side_L);
-
-  Serial.print("distance_side_R:");
-  Serial.println(distance_side_R);
-}
-
-////////// Encoder Interrupt //////
-void SetInterruptPin() {
-  //motor 1 interrupt
-  pinMode(BACK_ENCODER_A, INPUT_PULLUP);
-  attachInterrupt(0, BackEncoderA, CHANGE);
-
-  pinMode(BACK_ENCODER_B, INPUT_PULLUP);
-  attachInterrupt(1, BackEncoderB, CHANGE);
-
-  //motor 2 interrupt
-  pinMode(LEFT_ENCODER_A, INPUT_PULLUP);
-  attachInterrupt(2, LeftEncoderA, CHANGE);
-
-  pinMode(LEFT_ENCODER_B, INPUT_PULLUP);
-  attachInterrupt(3, LeftEncoderB, CHANGE);
-
-  //motor3 interrupt
-  pinMode(RIGTH_ENCODER_A, INPUT_PULLUP);
-  attachInterrupt(4, RightEncoderA, CHANGE);
-
-  pinMode(RIGTH_ENCODER_B, INPUT_PULLUP);
-  attachInterrupt(5, RightEncoderB, CHANGE);
-}
-
-// 엔코더 값 읽는 인터럽트 함수
-void BackEncoderA() {
-  backencoderpos += (digitalRead(BACK_ENCODER_A) == digitalRead(BACK_ENCODER_B)) ? 1 : -1;
-}
-void BackEncoderB() {
-  backencoderpos += (digitalRead(BACK_ENCODER_A) == digitalRead(BACK_ENCODER_B)) ? -1 : 1;
-}
-void LeftEncoderA() {
-  leftencoderpos += (digitalRead(LEFT_ENCODER_A) == digitalRead(LEFT_ENCODER_B)) ? 1 : -1;
-}
-void LeftEncoderB() {
-  leftencoderpos += (digitalRead(LEFT_ENCODER_A) == digitalRead(LEFT_ENCODER_B)) ? -1 : 1;
-}
-void RightEncoderA() {
-  rightencoderpos += (digitalRead(RIGTH_ENCODER_A) == digitalRead(RIGTH_ENCODER_B)) ? 1 : -1;
-}
-void RightEncoderB() {
-  rightencoderpos += (digitalRead(RIGTH_ENCODER_A) == digitalRead(RIGTH_ENCODER_B)) ? -1 : 1;
-}
-
-void ShowEncoderAll() {
-  Serial.print("backencoderpos : ");
-  Serial.println(backencoderpos);
-  Serial.print("leftencoderpos : ");
-  Serial.println(leftencoderpos);
-  Serial.print("rightencoderpos : ");
-  Serial.println(rightencoderpos);
-}
-*/
