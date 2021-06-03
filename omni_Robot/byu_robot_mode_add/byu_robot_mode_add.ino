@@ -89,8 +89,6 @@ bool IR_sensor_check = false;
 #define  MAX_SPEEDRPM 8000 //최대 속도RPM
 #define  MAX_PWM 255  //PWM 값
 
-enum Mode { AVOIDANCE_MODE = 1, FORWARD_MODE, CIRCLE_MODE, RECT_MDOE, COMMAND_MODE };
-
 // 변수 선언부
 // Motor Speed, DIR
 float back_wheel_speed, right_wheel_speed, left_wheel_speed;
