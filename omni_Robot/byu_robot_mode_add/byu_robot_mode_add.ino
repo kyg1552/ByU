@@ -160,15 +160,15 @@ ros::NodeHandle nh;
 
 void Byu_Cb(const geometry_msgs::Twist& byu_val) // 명령 값 받아서 byu robot 제어
 {
-  motor_forward_speed = byu_val.Twist.x;
+  motor_forward_speed = byu_val.linear.x;
   if (motor_forward_speed > forward_speed_max) motor_forward_speed = forward_speed_max;
   motor_forward_speed = -motor_forward_speed;
 
-  motor_moveTosideR_speed = byu_val.Twist.y;
+  motor_moveTosideR_speed = byu_val.linear.y;
   if (motor_moveTosideR_speed > side_speed_max) motor_moveTosideR_speed = side_speed_max;
   motor_moveTosideL_speed = -motor_moveTosideR_speed;
 
-  motor_turnR_speed = byu_val.Twist.z;
+  motor_turnR_speed = byu_val.angular.z;
   if (motor_turnR_speed > turn_speed_max) motor_turnR_speed = turn_speed_max;
   motor_turnL_speed = -motor_turnR_speed;
 
