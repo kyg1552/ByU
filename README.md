@@ -3,7 +3,7 @@
 * Project: Open-source robot platform providing personalized advertisements
 * Paper: http://koreascience.or.kr/article/JAKO202013363977204.page
 * Paper git link: https://github.com/ADRobot2019/ADRobot2019
-* 논문에 옴니휠 제어 코드에 오류가 있습니다. geometry_msgs/Transform을 geometry_msgs/Twist로 변경하여 사용하시길 바랍니다.
+* 논문에 옴니휠 제어 코드에 오류가 있습니다. geometry_msgs/Transform을 geometry_msgs/Twist로 변경하였습니다.
 #
 ## ROBOT H/W Architecture
 ![HW구성도](https://user-images.githubusercontent.com/37207332/75628129-6c5a0c80-5c19-11ea-8be5-8316deee991d.JPG)
@@ -54,23 +54,25 @@
 
 3. robot control ros command
 
-       $rostopic pub -r 15 /byu_control geometry_msgs/Twist "linear:
-        x: 0.0
-        y: 0.0
-        z: 0.0
-        angular:
-        x: 0.0
-        y: 0.0
-        z: 0.0"
+       $rostopic pub -r 15 /byu_control geometry_msgs/Twist 
+         "linear:
+          x: 0.0
+          y: 0.0
+          z: 0.0
+          angular:
+          x: 0.0
+          y: 0.0
+          z: 0.0"
 4. Example
     
        $roscore
        $rosrun rosserial_python serial_node.py _port:=/dev/ttyACM0
-       $rostopic pub -r 15 /byu_control geometry_msgs/Transform "linear:
-        x: 1.0
-        y: 1.0
-        z: 0.0
-        angular:
-        x: 0.0
-        y: 0.0
-        z: 0.5"
+       $rostopic pub -r 15 /byu_control geometry_msgs/Twist 
+         "linear:
+          x: 1.0
+          y: 1.0
+          z: 0.0
+          angular:
+          x: 0.0
+          y: 0.0
+          z: 0.5"
