@@ -1,6 +1,5 @@
 # Team: ByU
 
-
 * Project: Open-source robot platform providing personalized advertisements
 * Paper: http://koreascience.or.kr/article/JAKO202013363977204.page
 * Paper git link: https://github.com/ADRobot2019/ADRobot2019
